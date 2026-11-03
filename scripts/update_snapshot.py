@@ -16,6 +16,7 @@ BASE = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhut
 FIELDS = 'provinsi,tgl_update,total_hotspot,hotspot_rendah,hotspot_sedang,hotspot_tinggi,luas_lahan_terbakar_sipongi_2026,total_personil_gabungan,sortie_water_bombing'
 URL = BASE + '?' + urlencode({'where':'1=1','outFields':FIELDS,'returnGeometry':'false','f':'json','resultRecordCount':2000})
 ROOT = Path(__file__).resolve().parents[1]
+PRIORITY_PROVINCES = {'RIAU', 'JAMBI', 'SUMATERA SELATAN', 'KALIMANTAN BARAT', 'KALIMANTAN TENGAH', 'KALIMANTAN SELATAN'}
 
 def main():
     req = Request(URL, headers={'User-Agent':'Karhutla-Monitor-Public-Dashboard/0.1 (informational data) Accept: application/json','Accept':'application/json'})
@@ -26,7 +27,7 @@ def main():
     if not isinstance(data.get('features'), list):
         raise RuntimeError('Unexpected ArcGIS response: missing features')
     rows = [feature.get('attributes', {}) for feature in data['features']]
-    rows = [row for row in rows if isinstance(row,dict) and str(row.get('provinsi') or '').strip()]
+    rows = [row for row in rows if isinstance(row,dict) and str(row.get('provinsi') or '').strip().upper() in PRIORITY_PROVINCES]
     if not rows:
         raise RuntimeError('BNPB returned no named provinces; refusing to replace current snapshot')
     latest = {}
@@ -38,7 +39,7 @@ def main():
     payload = {
         'source': BASE.rsplit('/query',1)[0],
         'fetched_at': datetime.now(timezone.utc).isoformat(),
-        'scope_note': 'Subset of BNPB layer only; not necessarily national data',
+        'scope_note': 'Six priority provinces only; not national totals; missing values are not zero',
         'features': [{'attributes':row} for row in sorted(latest.values(),key=lambda r:r['provinsi'])]
     }
     output = ROOT / 'data' / 'karhutla.json'
