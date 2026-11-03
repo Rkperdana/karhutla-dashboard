@@ -7,7 +7,7 @@
   const BNPB_URL = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3/query';
   const BIG_URL = 'https://geoservices.big.go.id/gis/rest/services/STIG/Batas_Provinsi/MapServer/0/query';
   const FALLBACK_GEO = 'https://cdn.jsdelivr.net/gh/AlfianAliM/Indonesia-GeoJSON@master/provinsi.geojson';
-  const PROVINCES = ['Aceh','Sumatera Utara','Sumatera Barat','Riau','Kepulauan Riau','Jambi','Bengkulu','Sumatera Selatan','Kepulauan Bangka Belitung','Lampung','Banten','DKI Jakarta','Jawa Barat','Jawa Tengah','DI Yogyakarta','Jawa Timur','Bali','Nusa Tenggara Barat','Nusa Tenggara Timur','Kalimantan Barat','Kalimantan Tengah','Kalimantan Selatan','Kalimantan Timur','Kalimantan Utara','Sulawesi Utara','Gorontalo','Sulawesi Tengah','Sulawesi Barat','Sulawesi Selatan','Sulawesi Tenggara','Maluku','Maluku Utara','Papua Barat Daya','Papua Barat','Papua','Papua Selatan','Papua Tengah','Papua Pegunungan'];
+  const PROVINCES = ['Riau','Jambi','Sumatera Selatan','Kalimantan Barat','Kalimantan Tengah','Kalimantan Selatan'];
   const FIELDS = ['provinsi','tgl_update','total_hotspot','hotspot_rendah','hotspot_sedang','hotspot_tinggi','luas_lahan_terbakar_sipongi_2026','total_personil_gabungan','sortie_water_bombing'];
   const $ = id => document.getElementById(id);
   const nf = new Intl.NumberFormat('id-ID', {maximumFractionDigits: 2});
@@ -52,7 +52,7 @@
     // Do not add duplicate snapshots. Use the latest date per province, not a sum across reporting dates.
     const latest=new Map();
     for(const row of rows){const key=norm(row.provinsi), old=latest.get(key);if(!old||String(row.tgl_update||'')>String(old.tgl_update||''))latest.set(key,row);}
-    return [...latest.values()].sort((a,b)=>a.provinsi.localeCompare(b.provinsi,'id'));
+    return [...latest.values()].filter(r=>canonical.has(norm(r.provinsi))).sort((a,b)=>a.provinsi.localeCompare(b.provinsi,'id'));
   }
   async function fetchJson(url, timeoutMs=14000){
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeoutMs);
@@ -120,14 +120,14 @@
   }
   async function initMap(){const loader=$('map-loading');if(typeof window.L==='undefined'){loader.innerHTML='<strong>Peta interaktif belum dapat dimuat</strong><small>Periksa koneksi ke pustaka Leaflet.</small>';return;}
     state.map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:4,maxZoom:12,preferCanvas:true}).setView([-2.5,118.5],5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:19,subdomains:'abcd'}).addTo(state.map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(state.map);
     L.control.zoom({position:'bottomright'}).addTo(state.map);
     const options=[{name:'BIG',url:new URL(BIG_URL)},{name:'GeoJSON',url:FALLBACK_GEO}];options[0].url.search=new URLSearchParams({where:'1=1',outFields:'WADMPR',returnGeometry:'true',outSR:'4326',geometryPrecision:'3',maxAllowableOffset:'0.008',f:'geojson'});
     let geo;
     for(const opt of options){try{const json=await fetchJson(String(opt.url),opt.name==='BIG'?18000:24000);if(json?.type!=='FeatureCollection'||!Array.isArray(json.features)||json.features.length<20)throw new Error('Layer batas tidak lengkap');geo=json;break;}catch(err){console.warn('Batas provinsi',opt.name,err.message);}}
     if(!geo){loader.innerHTML='<strong>Geometri provinsi belum tersedia</strong><small>Basemap aktif. Layer batas dapat terhubung ketika server geospasial merespons.</small>';return;}
     state.geoFeatures=geo.features;state.geoReady=true;
-    const layer=L.geoJSON(geo,{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
+    const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
       const name=geoName(feature.properties);if(name){polygon.bindTooltip(name,{direction:'top',sticky:true});polygon.on('click',()=>chooseProvince(name));polygon.on('mouseover',()=>polygon.setStyle({weight:2.5,color:'#fff3bf'}));polygon.on('mouseout',()=>renderMap());}
     }}).addTo(state.map);
     state.shapes=layer;loader.hidden=true;state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});renderMap();
