@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f8fc">
+  <meta name="description" content="Indonesia Karhutla Monitor 2026 — eksplorasi data karhutla BNPB di peta interaktif. Angka hanya ditampilkan bila sumber tersedia.">
+  <title>Indonesia Karhutla Monitor 2026 · Geospatial Explorer</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo8Hn9a2Y2I7i6c4=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="site">
+    <header class="header">
+      <a class="brand" href="#peta" aria-label="Beranda Indonesia Karhutla Monitor 2026">
+        <div class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 38 46" width="38" height="46" fill="none"><path d="M22 1c4 8-2 12 6 20 4 4 8 9 8 14 0 8-7 12-17 12C8 47 2 41 2 32c0-8 7-14 10-20 2 6 5 8 6 12 4-6 6-12 4-23Z" fill="url(#flame)"/><path d="M18 25c3 3 1 7 5 10 2 2 2 5 0 7-1 2-7 3-10 0-6-5 1-11 5-17Z" fill="#fff6df"/><defs><linearGradient id="flame" x1="7" y1="6" x2="32" y2="39"><stop stop-color="#f34e26"/><stop offset="1" stop-color="#ffad26"/></linearGradient></defs></svg></div>
+        <div class="brand-text"><strong>Indonesia Karhutla Monitor <span>2026</span></strong><small>Eksplorasi data kebakaran hutan dan lahan</small></div>
+      </a>
+      <nav class="desktop-nav" aria-label="Navigasi utama">
+        <button class="nav-link active" data-view="peta">Peta Explorer</button>
+        <button class="nav-link" data-view="analisis">Analisis</button>
+        <button class="nav-link" data-view="provinsi">Data Provinsi</button>
+        <button class="nav-link" data-view="metodologi">Metodologi</button>
+      </nav>
+      <div class="header-actions">
+        <span id="source-status" class="source-status pending"><span class="status-dot"></span><span id="source-status-text">Memeriksa data</span></span>
+        <button class="icon-btn" id="refresh-btn" title="Segarkan data BNPB" aria-label="Segarkan data BNPB"><svg data-icon="refresh"></svg></button>
+        <button class="icon-btn" id="theme-btn" title="Ganti tema" aria-label="Ganti tema"><svg data-icon="sun"></svg></button>
+        <button class="icon-btn mobile-menu-btn" id="filter-mobile-btn" title="Buka filter" aria-label="Buka filter"><svg data-icon="sliders"></svg></button>
+      </div>
+    </header>
+    <nav class="mobile-tabs" aria-label="Navigasi tampilan seluler"><button class="active" data-view="peta">Peta</button><button data-view="analisis">Analisis</button><button data-view="provinsi">Data Provinsi</button><button data-view="metodologi">Metodologi</button></nav>
+    <div class="workspace" id="workspace">
+      <aside class="filters" id="filters" aria-label="Filter dan layer peta">
+        <div class="filters-heading"><h2>Filter Data</h2><button class="plain-btn mobile-filter-close" id="filter-close-btn" aria-label="Tutup filter">✕</button></div>
+        <div class="filter-group"><label for="year">Tahun</label><select id="year"><option value="2026">2026</option></select></div>
+        <div class="filter-group"><label for="province-select">Provinsi</label><select id="province-select"><option value="">Semua wilayah tersedia</option></select></div>
+        <div class="filter-group"><label>Tingkat kepercayaan hotspot</label><div class="checkbox-stack"><label><input type="checkbox" data-confidence="rendah" checked><span>Rendah</span><i class="small-circle low"></i></label><label><input type="checkbox" data-confidence="sedang" checked><span>Sedang</span><i class="small-circle med"></i></label><label><input type="checkbox" data-confidence="tinggi" checked><span>Tinggi</span><i class="small-circle high"></i></label></div></div>
+        <div class="sidebar-divider"></div>
+        <div class="filter-group"><label>Layer Peta</label>
+          <label class="toggle-row"><span>Sebaran hotspot</span><input type="radio" name="map-mode" value="hotspot" checked><i class="toggle-ui"></i></label>
+          <label class="toggle-row"><span>Luas terbakar</span><input type="radio" name="map-mode" value="area"><i class="toggle-ui"></i></label>
+          <label class="toggle-row"><span>Batas provinsi</span><input id="show-boundaries" type="checkbox" checked><i class="toggle-ui"></i></label>
+        </div>
+        <button class="reset-btn" id="reset-btn"><svg data-icon="refresh"></svg> Reset Filter</button>
+        <div class="sidebar-note"><div class="sidebar-note-icon">i</div><div><strong>Perhatian cakupan data</strong><p id="scope-notice">Hanya provinsi yang tersedia pada layanan BNPB ditampilkan dalam perhitungan. Wilayah tanpa data tidak dianggap nol.</p></div></div>
+        <div class="sidebar-footer"><span>SUMBER RESMI</span><a href="https://data.bnpb.go.id/data/karhutla2026" target="_blank" rel="noopener noreferrer">BNPB · Karhutla 2026 <span>↗</span></a><p>Visualisasi independen, bukan situs resmi BNPB.</p></div>
+      </aside>
+      <div class="filter-scrim" id="filter-scrim"></div>
+      <main class="main" id="main-content">
+        <section class="intro-row"><div><div class="eyebrow"><span class="eyebrow-line"></span> GEOSPATIAL EXPLORER <span class="tag-year">2026</span></div><h1>Pantau karhutla melalui peta.</h1><p>Jelajahi titik panas, luas terbakar, dan penanganan karhutla berdasarkan data BNPB.</p></div><div class="scope-pill"><svg data-icon="info"></svg> <span id="scope-caption">Cakupan belum terverifikasi</span></div></section>
+        <section class="map-section" id="peta" aria-label="Peta interaktif sebaran karhutla">
+          <div id="map" aria-label="Peta Indonesia interaktif"></div>
+          <div class="map-topbar"><div class="search-wrap"><svg data-icon="search"></svg><input id="map-search" type="search" placeholder="Cari provinsi..." aria-label="Cari provinsi" autocomplete="off"><div class="search-results" id="search-results" hidden></div></div><div class="map-toolset"><button class="map-tool" id="layer-btn" title="Tampilkan/ubah layer" aria-label="Tampilkan layer"><svg data-icon="layers"></svg></button><button class="map-tool" id="fullscreen-btn" title="Perbesar peta" aria-label="Perbesar peta"><svg data-icon="expand"></svg></button></div></div>
+          <div class="map-bottom"><div class="map-legend"><strong id="legend-title">Jumlah hotspot terlapor</strong><div class="gradient"><span>0</span><div class="gradient-bar"></div><span>Lebih banyak</span></div><div class="legend-extra"><span><i class="legend-dot missing"></i> Tidak ada data</span><span><i class="legend-dot present"></i> Data tersedia</span></div></div><div class="map-caption"><svg data-icon="info"></svg> <span id="map-caption-text">Pilih provinsi untuk melihat data. Peta tidak menyajikan tingkat risiko kebakaran.</span></div></div>
+          <div class="map-loading" id="map-loading"><div class="loading-orbit"></div><strong>Memuat peta Indonesia</strong><small>Geometri provinsi dari sumber geospasial</small></div>
+          <aside class="province-detail" id="province-detail"><div class="detail-top"><span>DETAIL PROVINSI</span><button id="detail-close-btn" aria-label="Kosongkan pilihan provinsi">✕</button></div><div class="detail-empty" id="detail-empty"><div class="detail-empty-icon"><svg data-icon="pin"></svg></div><strong>Pilih provinsi</strong><p>Klik wilayah pada peta atau cari provinsi untuk melihat data yang tersedia.</p></div><div id="detail-content" class="detail-content" hidden><h3 id="detail-name">—</h3><p id="detail-coverage">Memeriksa cakupan data</p><div class="detail-list" id="detail-list"></div><div id="detail-date" class="detail-updated"></div></div><div class="detail-foot">Data: <a href="https://data.bnpb.go.id/data/karhutla2026" target="_blank" rel="noopener noreferrer">BNPB ↗</a></div></aside>
+        </section>
+        <section class="metric-grid" id="analisis" aria-label="Ringkasan statistik wilayah tersedia">
+          <article class="metric-card red"><div class="metric-icon"><svg data-icon="fire"></svg></div><div><p>Total hotspot <span class="kpi-info" title="Hanya dalam cakupan data yang tersedia">ⓘ</span></p><strong id="kpi-hotspot">—</strong><small id="kpi-hotspot-sub">Menunggu data</small></div></article>
+          <article class="metric-card green"><div class="metric-icon"><svg data-icon="tree"></svg></div><div><p>Luas terbakar</p><strong id="kpi-area">—</strong><small>hektare · wilayah tersedia</small></div></article>
+          <article class="metric-card blue"><div class="metric-icon"><svg data-icon="people"></svg></div><div><p>Personel gabungan</p><strong id="kpi-personnel">—</strong><small>orang · wilayah tersedia</small></div></article>
+          <article class="metric-card violet"><div class="metric-icon"><svg data-icon="helicopter"></svg></div><div><p>Sortie water bombing</p><strong id="kpi-sorties">—</strong><small>sortie · wilayah tersedia</small></div></article>
+        </section>
+        <section class="analytics-grid">
+          <article class="panel panel-trend"><div class="panel-heading"><div><h2><svg data-icon="chart"></svg> Tren Hotspot</h2><p>Riwayat tanggal dari API diperlukan</p></div></div><div class="segments"><button data-trend="total" class="active">Total</button><button data-trend="rendah">Rendah</button><button data-trend="sedang">Sedang</button><button data-trend="tinggi">Tinggi</button></div><div class="chart-empty"><div class="mini-bars"><i></i><i></i><i></i></div><strong>Belum ada data historis</strong><p>Snapshot per provinsi tidak otomatis membentuk tren harian. Grafik akan aktif setelah riwayat terverifikasi tersedia.</p></div></article>
+          <article class="panel panel-ranking"><div class="panel-heading"><h2><svg data-icon="trophy"></svg> Peringkat Provinsi</h2><select id="ranking-metric" aria-label="Urutkan peringkat"><option value="hotspot">Hotspot</option><option value="area">Luas terbakar</option></select></div><div id="ranking-list" class="ranking-list"><div class="list-empty">Menunggu data provinsi.</div></div></article>
+          <article class="panel panel-composition"><div class="panel-heading"><h2><svg data-icon="pie"></svg> Komposisi Hotspot</h2></div><div class="composition-body"><div class="donut" id="donut"><div class="donut-core"><span id="donut-value">—</span><small id="donut-label">Belum ada data</small></div></div><div class="composition-legend"><div><i class="small-circle high"></i> Tinggi <strong id="legend-high">—</strong></div><div><i class="small-circle med"></i> Sedang <strong id="legend-med">—</strong></div><div><i class="small-circle low"></i> Rendah <strong id="legend-low">—</strong></div></div></div></article>
+        </section>
+        <section class="table-panel" id="provinsi"><div class="table-title-row"><div><h2>Data per Provinsi</h2><p>Angka hanya muncul untuk wilayah yang tercakup dalam respons layanan BNPB.</p></div><div class="table-buttons"><button id="download-csv-btn" class="btn-outline"><svg data-icon="download"></svg> CSV</button><button id="download-json-btn" class="btn-outline"><svg data-icon="download"></svg> JSON</button></div></div><div class="table-scroll"><table><thead><tr><th>Provinsi</th><th>Hotspot</th><th>Luas terbakar (ha)</th><th>Personel</th><th>Diperbarui</th></tr></thead><tbody id="province-table"><tr><td colspan="5" class="table-empty">Menunggu koneksi data BNPB</td></tr></tbody></table></div></section>
+        <section class="method-panel" id="metodologi"><div><span class="eyebrow">SUMBER & METODOLOGI</span><h2>Data transparan, tanpa angka ilustratif.</h2><p>Data statistik berasal dari layer ArcGIS resmi BNPB. Peta batas administrasi disediakan oleh sumber geospasial terpisah. Nilai yang kosong berarti tidak tersedia, bukan nol. Peta diwarnai berdasarkan besaran kuantitatif yang ditampilkan, bukan klasifikasi risiko karhutla.</p><p><strong>Catatan:</strong> Layer BNPB saat ini memiliki cakupan spasial terbatas. Jumlah hasil penjumlahan bukan total nasional kecuali seluruh wilayah sudah terwakili dan diverifikasi. Nilai kolom `luas_lahan_terbakar_sipongi_2026` mengikuti definisi sumber aslinya.</p></div><div class="source-links"><a href="https://data.bnpb.go.id/data/karhutla2026" target="_blank" rel="noopener noreferrer">Dashboard resmi BNPB <span>↗</span></a><a href="https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3" target="_blank" rel="noopener noreferrer">Metadata API BNPB <span>↗</span></a><a href="https://geoservices.big.go.id/gis/rest/services/STIG/Batas_Provinsi/MapServer/0" target="_blank" rel="noopener noreferrer">Batas Provinsi BIG <span>↗</span></a></div></section>
+        <footer class="footer"><span>© 2026 Indonesia Karhutla Monitor · Prototipe independen</span><span id="footer-update">Terakhir diperbarui: —</span></footer>
+      </main>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
