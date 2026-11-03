@@ -13,21 +13,32 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 BASE = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3/query'
+V2 = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_tabeldata_karhutla_prov_2026_v2/MapServer/3/query'
 FIELDS = 'provinsi,tgl_update,total_hotspot,hotspot_rendah,hotspot_sedang,hotspot_tinggi,luas_lahan_terbakar_sipongi_2026,total_personil_gabungan,sortie_water_bombing'
 URL = BASE + '?' + urlencode({'where':'1=1','outFields':FIELDS,'returnGeometry':'false','f':'json','resultRecordCount':2000})
 ROOT = Path(__file__).resolve().parents[1]
 PRIORITY_PROVINCES = {'RIAU', 'JAMBI', 'SUMATERA SELATAN', 'KALIMANTAN BARAT', 'KALIMANTAN TENGAH', 'KALIMANTAN SELATAN'}
 
 def main():
-    req = Request(URL, headers={'User-Agent':'Karhutla-Monitor-Public-Dashboard/0.1 (informational data) Accept: application/json','Accept':'application/json'})
-    with urlopen(req, timeout=30) as response:
-        data = json.load(response)
-    if data.get('error'):
-        raise RuntimeError(f"ArcGIS API error: {data['error']}")
-    if not isinstance(data.get('features'), list):
-        raise RuntimeError('Unexpected ArcGIS response: missing features')
-    rows = [feature.get('attributes', {}) for feature in data['features']]
-    rows = [row for row in rows if isinstance(row,dict) and str(row.get('provinsi') or '').strip().upper() in PRIORITY_PROVINCES]
+    candidates = []
+    for base in (V2, BASE):
+        url = base + '?' + urlencode({'where':'1=1','outFields':FIELDS,'returnGeometry':'false','f':'json','resultRecordCount':2000})
+        try:
+            req = Request(url, headers={'User-Agent':'Karhutla-Monitor/1.0','Accept':'application/json'})
+            with urlopen(req, timeout=25) as response:
+                data = json.load(response)
+            if data.get('error') or not isinstance(data.get('features'), list):
+                raise RuntimeError('Invalid ArcGIS response')
+            rows = [feature.get('attributes', {}) for feature in data['features']]
+            rows = [row for row in rows if isinstance(row,dict) and str(row.get('provinsi') or '').strip().upper() in PRIORITY_PROVINCES]
+            if rows:
+                newest = max(str(row.get('tgl_update') or '') for row in rows)
+                candidates.append((newest,base,rows))
+        except Exception as exc:
+            print(f'Endpoint unavailable {base}: {exc}')
+    if not candidates:
+        raise RuntimeError('No verified province records from either BNPB endpoint')
+    _, selected_base, rows = max(candidates, key=lambda item:item[0])
     if not rows:
         raise RuntimeError('BNPB returned no named provinces; refusing to replace current snapshot')
     latest = {}
@@ -37,7 +48,7 @@ def main():
         if old is None or str(row.get('tgl_update') or '') > str(old.get('tgl_update') or ''):
             latest[name] = {k:row.get(k) for k in FIELDS.split(',')}
     payload = {
-        'source': BASE.rsplit('/query',1)[0],
+        'source': selected_base.rsplit('/query',1)[0],
         'fetched_at': datetime.now(timezone.utc).isoformat(),
         'scope_note': 'Six priority provinces only; not national totals; missing values are not zero',
         'features': [{'attributes':row} for row in sorted(latest.values(),key=lambda r:r['provinsi'])]
