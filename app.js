@@ -125,6 +125,22 @@
     state.map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:4,maxZoom:12,preferCanvas:true}).setView([-2.5,118.5],5);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(state.map);
     L.control.zoom({position:'bottomright'}).addTo(state.map);
+    // Guaranteed interactive fallback: geographic reference markers, NOT hotspot locations.
+    const centers=[
+      ['Riau',0.53,101.45],['Jambi',-1.61,103.61],
+      ['Sumatera Selatan',-3.32,104.91],['Kalimantan Barat',-0.03,109.34],
+      ['Kalimantan Tengah',-1.68,113.38],['Kalimantan Selatan',-3.09,115.28]
+    ];
+    const markers=L.layerGroup().addTo(state.map);
+    for(const [name,lat,lng] of centers){
+      const marker=L.circleMarker([lat,lng],{radius:9,color:'#ffffff',weight:2,fillColor:'#ef7c43',fillOpacity:.9});
+      marker.bindTooltip(name+' · penanda lokasi provinsi (bukan titik hotspot)',{direction:'top'});
+      marker.on('click',()=>chooseProvince(name));
+      marker.addTo(markers);
+    }
+    loader.hidden=true;
+    setTimeout(()=>state.map?.invalidateSize(),100);
+
     const bigUrl=new URL(BIG_URL);
      bigUrl.search=new URLSearchParams({where:'1=1',outFields:'WADMPR',returnGeometry:'true',outSR:'4326',geometryPrecision:'3',maxAllowableOffset:'0.008',f:'geojson'});
      const sources=[String(bigUrl),FALLBACK_GEO];
@@ -135,12 +151,12 @@
      }));
      let geo;
      try{geo=await Promise.any(attempts);}
-     catch(err){loader.innerHTML='<strong>Batas provinsi belum tersedia</strong><small>Peta dasar tetap dapat digunakan. Muat ulang untuk mencoba lagi.</small>';return;}
+     catch(err){console.warn('Batas provinsi gagal; penanda provinsi tetap aktif.',err);$('map-caption-text').textContent='Penanda menunjukkan lokasi perkiraan provinsi, bukan titik hotspot. Batas provinsi belum tersedia.';return;}
      state.geoFeatures=geo.features;state.geoReady=true;
     const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
       const name=geoName(feature.properties);if(name){polygon.bindTooltip(name,{direction:'top',sticky:true});polygon.on('click',()=>chooseProvince(name));polygon.on('mouseover',()=>polygon.setStyle({weight:2.5,color:'#fff3bf'}));polygon.on('mouseout',()=>renderMap());}
     }}).addTo(state.map);
-    state.shapes=layer;loader.hidden=true;if(layer.getLayers().length)state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});renderMap();
+    state.shapes=layer;if(layer.getLayers().length){markers.clearLayers();state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});}renderMap();
   }
   function start(){installIcons();fillProvinceOptions();installEvents();render();initMap();loadBnpb();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
