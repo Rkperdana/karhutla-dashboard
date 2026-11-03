@@ -88,7 +88,7 @@
   function valColor(v,max){if(v===null)return '#8a98a8';if(v===0)return '#b4c8d4';const p=max<=0?0:v/max;return p>.75?'#b83f48':p>.45?'#eb6c42':p>.18?'#f6a652':'#fbdc83';}
   function recordFor(name){return state.records.find(r=>norm(r.provinsi)===norm(name));}
   function geoName(properties){const keys=['WADMPR','wadmpr','name','NAME_1','nama','provinsi','NAMA_PROV','PROVINSI','prov_name','province','NAMA','Propinsi'];for(const key of keys){if(typeof properties?.[key]==='string'&&properties[key].trim())return provinceName(properties[key]);}for(const [k,v] of Object.entries(properties||{})){if(typeof v==='string'&&canonical.has(norm(v)))return provinceName(v);}return ''}
-  function renderMap(){if(!state.shapes)return;const max=Math.max(0,...state.records.map(r=>byMetric(r,state.mapMode)).filter(v=>v!==null));state.shapes.eachLayer(layer=>{const name=geoName(layer.feature?.properties),rec=recordFor(name),value=rec?byMetric(rec,state.mapMode):null;layer.setStyle({color:state.selected===name?'#fff0a2':'#d4dde5',weight:state.showBoundaries?(state.selected===name?2.7:1.2):0,fillColor:valColor(value,max),fillOpacity:value===null?.42:.82});if(layer.bringToFront&&state.selected===name)layer.bringToFront();});$('legend-title').textContent=state.mapMode==='area'?'Luas terbakar terlapor (ha)':'Jumlah hotspot terlapor';$('map-caption-text').textContent='Warna menunjukkan '+(state.mapMode==='area'?'luas terbakar':'jumlah hotspot')+', bukan tingkat risiko kebakaran.';}
+  function renderMap(){if(!state.shapes)return;const max=Math.max(0,...state.records.map(r=>byMetric(r,state.mapMode)).filter(v=>v!==null));state.shapes.eachLayer(layer=>{const name=geoName(layer.feature?.properties),rec=recordFor(name),value=rec?byMetric(rec,state.mapMode):null;layer.setStyle({color:state.selected===name?'#173b62':'#ffffff',weight:state.showBoundaries?(state.selected===name?2.7:1.2):0,fillColor:valColor(value,max),fillOpacity:value===null?.75:.96});if(layer.bringToFront&&state.selected===name)layer.bringToFront();});$('legend-title').textContent=state.mapMode==='area'?'Luas terbakar terlapor (ha)':'Jumlah hotspot terlapor';$('map-caption-text').textContent='Warna menunjukkan '+(state.mapMode==='area'?'luas terbakar':'jumlah hotspot')+', bukan tingkat risiko kebakaran.';}
   function render(){setScope();renderKpis();renderRanking();renderDonut();renderTable();renderDetails();renderMap();}
   function chooseProvince(name){const clean=provinceName(name);state.selected=clean;state.province=clean;$('province-select').value=clean;$('map-search').value='';$('search-results').hidden=true;render();if(state.shapes){let match;state.shapes.eachLayer(layer=>{if(norm(geoName(layer.feature?.properties))===norm(clean))match=layer;});if(match&&match.getBounds)state.map.fitBounds(match.getBounds(),{maxZoom:7,padding:[26,26],animate:true});}closeFilter();}
   function clearProvince(){state.province='';state.selected='';$('province-select').value='';render();if(state.map)state.map.flyTo([-2.5,118.3],5,{animate:true,duration:.6});}
@@ -165,7 +165,7 @@
   }
   async function initMap(){const loader=$('map-loading');if(typeof window.L==='undefined'){loader.innerHTML='<strong>Peta interaktif belum dapat dimuat</strong><small>Periksa koneksi ke pustaka Leaflet.</small>';return;}
     state.map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:4,maxZoom:12,preferCanvas:true}).setView([-2.5,118.5],5);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(state.map);
+    // Flourish-style choropleth: vector GeoJSON only, no raster basemap tiles.
     L.control.zoom({position:'bottomright'}).addTo(state.map);
     // Guaranteed interactive fallback: geographic reference markers, NOT hotspot locations.
     const centers=[
@@ -197,10 +197,10 @@
       return;
     }
      state.geoFeatures=geo.features;state.geoReady=true;
-    const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
+    const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#ffffff',weight:2,fillOpacity:.95,fillColor:'#d9e0e8'}),onEachFeature:(feature,polygon)=>{
       const name=geoName(feature.properties);if(name){polygon.bindTooltip(name,{direction:'top',sticky:true});polygon.on('click',()=>chooseProvince(name));polygon.on('mouseover',()=>polygon.setStyle({weight:2.5,color:'#fff3bf'}));polygon.on('mouseout',()=>renderMap());}
     }}).addTo(state.map);
-    state.shapes=layer;if(layer.getLayers().length){markers.clearLayers();state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});}renderMap();
+    state.shapes=layer;if(layer.getLayers().length){markers.clearLayers();state.map.invalidateSize();state.map.fitBounds(layer.getBounds(),{padding:[32,34],maxZoom:7,animate:false});}renderMap();
   }
   function start(){installIcons();fillProvinceOptions();installEvents();render();initMap();loadBnpb();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
