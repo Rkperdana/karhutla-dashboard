@@ -130,7 +130,16 @@
       const dates=records.map(r=>String(r.tgl_update||'')).filter(Boolean).sort();
       return {records,source:endpoint.name,latest:dates.at(-1)||'',fetched:new Date().toISOString()};
     }));
-    const available=checks.filter(x=>x.status==='fulfilled').map(x=>x.value).sort((x,y)=>y.latest.localeCompare(x.latest));
+    let snapshot=null;
+    try{
+      const json=await fetchJson('data/karhutla.json?rev=20261103',4500);
+      const records=parseRecords(json);
+      if(records.length){
+        const dates=records.map(r=>String(r.tgl_update||'')).filter(Boolean).sort();
+        snapshot={records,source:'CSV BNPB · '+(json.reference_date||'tanggal tidak tersedia'),latest:dates.at(-1)||'',fetched:json.fetched_at||null};
+      }
+    }catch(error){console.warn('Snapshot BNPB tidak tersedia:',error);}
+    const available=[...checks.filter(x=>x.status==='fulfilled').map(x=>x.value),...(snapshot?[snapshot]:[])].sort((x,y)=>y.latest.localeCompare(x.latest));
     if(available.length){
       const best=available[0];
       state.records=best.records;state.source=best.source;state.fetched=best.fetched;
