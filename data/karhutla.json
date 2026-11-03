@@ -1,13 +1,12 @@
 {
   "source": "BNPB Dashboard Informasi Penanganan Karhutla — CSV Unduh Data (enam provinsi)",
-  "reference_date": "2026-11-02",
   "fetched_at": "2026-11-03",
-  "scope_note": "Tanggal rujukan sesuai label dashboard resmi BNPB; file CSV tidak memiliki kolom tanggal per provinsi. Kolom tingkat hotspot yang kosong tetap null.",
+  "scope_note": "CSV diunduh 3 November 2026; file tidak memiliki tanggal rujukan per provinsi. Jangan menganggap tanggal dashboard sebagai tanggal setiap rekaman.",
   "features": [
     {
       "attributes": {
         "provinsi": "Riau",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 4,
         "hotspot_rendah": 0,
         "hotspot_sedang": null,
@@ -20,7 +19,7 @@
     {
       "attributes": {
         "provinsi": "Jambi",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 13,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
@@ -33,7 +32,7 @@
     {
       "attributes": {
         "provinsi": "Sumatera Selatan",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 85,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
@@ -46,7 +45,7 @@
     {
       "attributes": {
         "provinsi": "Kalimantan Barat",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 14,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
@@ -59,7 +58,7 @@
     {
       "attributes": {
         "provinsi": "Kalimantan Tengah",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 367,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
@@ -72,7 +71,7 @@
     {
       "attributes": {
         "provinsi": "Kalimantan Selatan",
-        "tgl_update": "2026-11-02",
+        "tgl_update": null,
         "total_hotspot": 105,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
