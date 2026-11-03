@@ -54,6 +54,15 @@ def main():
         'features': [{'attributes':row} for row in sorted(latest.values(),key=lambda r:r['provinsi'])]
     }
     output = ROOT / 'data' / 'karhutla.json'
+    if output.exists():
+        try:
+            previous = json.loads(output.read_text(encoding='utf-8'))
+            previous_date = str(previous.get('reference_date') or max((str(f.get('attributes', {}).get('tgl_update') or '') for f in previous.get('features', [])), default=''))
+            if previous_date > str(max((r.get('tgl_update') or '' for r in latest.values()), default='')):
+                print(f'Keeping newer verified snapshot ({previous_date}); ArcGIS data is older')
+                return
+        except (ValueError, TypeError, OSError):
+            pass
     output.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f'Wrote {len(latest)} distinct province records -> {output}')
 
