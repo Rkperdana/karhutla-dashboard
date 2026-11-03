@@ -82,8 +82,25 @@
   function renderDetails(){const name=state.selected||state.province;const panel=$('province-detail');if(!name){$('detail-empty').hidden=false;$('detail-content').hidden=true;panel.classList.remove('selected');return;}
     panel.classList.add('selected');$('detail-empty').hidden=true;$('detail-content').hidden=false;$('detail-name').textContent=name;
     const r=state.records.find(x=>norm(x.provinsi)===norm(name));$('detail-coverage').textContent=r?'Rekaman tersedia dalam layer BNPB':'Tidak ada rekaman untuk provinsi ini';$('detail-date').textContent=r?'Tanggal data: '+(r.tgl_update?formatDate(r.tgl_update):'tidak tercantum dalam CSV'):'Ketiadaan rekaman tidak berarti tidak ada karhutla.';
-    const rows=[['Total hotspot',r?displayedHotspot(r):null],['Hotspot tinggi',r?.hotspot_tinggi],['Hotspot sedang',r?.hotspot_sedang],['Hotspot rendah',r?.hotspot_rendah],['Luas terbakar (ha)',r?.luas_lahan_terbakar_sipongi_2026],['Personel gabungan',r?.total_personil_gabungan],['Sortie water bombing',r?.sortie_water_bombing]];
-    $('detail-list').replaceChildren();rows.forEach(([key,val])=>{const node=document.createElement('div');const label=document.createElement('span'),str=document.createElement('strong');label.textContent=key;str.textContent=fmt(val);node.append(label,str);$('detail-list').append(node);});
+    const labels={
+      total_hotspot:'Total hotspot',hotspot_rendah:'Hotspot rendah',hotspot_sedang:'Hotspot sedang',hotspot_tinggi:'Hotspot tinggi',
+      fire_spot:'Fire spot',luas_lahan_terbakar_sipongi_2026:'Lahan terbakar indikatif (ha)',
+      lahan_terbakar_harian_ha:'Lahan terbakar harian (ha)',luas_lahan_terbakar_centurisk:'Luas lahan terbakar (Centurisk)',
+      luas_lahan_belum_padam_centurisk:'Luas lahan belum padam (Centurisk)',
+      kualitas_udara_pm25:'Kualitas udara PM2.5',jarak_pandang_bandara_km:'Jarak pandang bandara (km)',
+      luas_lahan_ditangani_darat:'Luas ditangani darat',luas_lahan_akan_dipadamkan:'Luas akan dipadamkan',
+      luas_lahan_ditangani_udara:'Luas ditangani udara',total_personil_gabungan:'Total personel',
+      sortie_water_bombing:'Sortie water bombing',volume_wb_liter:'Volume water bombing (liter)',
+      rekomendasi:'Rekomendasi BNPB',kesimpulan:'Kesimpulan BNPB'
+    };
+    const list=$('detail-list');list.replaceChildren();
+    if(r)Object.entries(r).filter(([key])=>!['provinsi','tgl_update'].includes(key)).forEach(([key,value])=>{
+      const node=document.createElement('div'),label=document.createElement('span'),str=document.createElement('strong');
+      label.textContent=labels[key]||key.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+      str.textContent=value===null||value===undefined||value===''?'—':typeof value==='number'?fmt(value):String(value);
+      if(key==='rekomendasi'||key==='kesimpulan'){node.classList.add('detail-long');str.style.whiteSpace='normal';}
+      node.append(label,str);list.append(node);
+    });
   }
   function valColor(v,max){if(v===null)return '#8a98a8';if(v===0)return '#b4c8d4';const p=max<=0?0:v/max;return p>.75?'#b83f48':p>.45?'#eb6c42':p>.18?'#f6a652':'#fbdc83';}
   function recordFor(name){return state.records.find(r=>norm(r.provinsi)===norm(name));}
