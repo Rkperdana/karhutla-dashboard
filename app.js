@@ -65,11 +65,11 @@
     const n=state.records.length;
     const dates=state.records.map(r=>r.tgl_update).filter(Boolean).sort();
     const first=dates[0], lastDate=dates.at(-1);
-    const period=lastDate?(first!==lastDate?`${formatDate(first)}–${formatDate(lastDate)}`:formatDate(lastDate)):'belum tersedia';
+    const period=lastDate?(first!==lastDate?`${formatDate(first)}–${formatDate(lastDate)}`:formatDate(lastDate)):'tidak tercantum dalam CSV';
     $('scope-caption').textContent=n?`${n} provinsi · Data per ${period} · bukan total nasional`:'Data per: belum tersedia';
     $('scope-notice').textContent=n?`${n} provinsi memiliki rekaman dalam layer ini. Angka yang ditampilkan merupakan agregat wilayah tercakup, bukan total nasional. Nilai kosong bukan nol.`:'Hanya provinsi yang tersedia pada layanan BNPB masuk perhitungan. Wilayah tanpa data tidak dianggap nol.';
     let last=state.records.map(r=>r.tgl_update).filter(Boolean).sort().at(-1);
-    $('footer-update').textContent='Tanggal rujukan BNPB: '+formatDate(last)+(state.fetched?' · Diambil: '+new Date(state.fetched).toLocaleString('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'})+' WIB':'');
+    $('footer-update').textContent='Tanggal data per provinsi: '+(last?formatDate(last):'tidak tercantum')+(state.fetched?' · Diambil: '+new Date(state.fetched).toLocaleString('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'})+' WIB':'');
   }
   function filteredRecords(){return state.province?state.records.filter(r=>norm(r.provinsi)===norm(state.province)):state.records;}
   function displayedHotspot(rec){const sel=[...state.levels];if(sel.length===0)return null;if(sel.length===3 && rec.total_hotspot!==null)return rec.total_hotspot;const vals=sel.map(k=>rec['hotspot_'+k]);return vals.some(v=>v===null||v===undefined)?null:vals.reduce((a,b)=>a+b,0);}
@@ -81,7 +81,7 @@
   function renderTable(){const tbody=$('province-table');tbody.replaceChildren();const rows=filteredRecords();if(!rows.length){tbody.innerHTML='<tr><td colspan="5" class="table-empty">Tidak ada data provinsi yang dapat ditampilkan.</td></tr>';return;}for(const r of rows){const tr=document.createElement('tr');const values=[r.provinsi,fmt(displayedHotspot(r)),fmt(r.luas_lahan_terbakar_sipongi_2026),fmt(r.total_personil_gabungan),formatDate(r.tgl_update)];for(const v of values){const td=document.createElement('td');td.textContent=v;tr.append(td);}tr.addEventListener('click',()=>chooseProvince(r.provinsi));tbody.append(tr);}}
   function renderDetails(){const name=state.selected||state.province;const panel=$('province-detail');if(!name){$('detail-empty').hidden=false;$('detail-content').hidden=true;panel.classList.remove('selected');return;}
     panel.classList.add('selected');$('detail-empty').hidden=true;$('detail-content').hidden=false;$('detail-name').textContent=name;
-    const r=state.records.find(x=>norm(x.provinsi)===norm(name));$('detail-coverage').textContent=r?'Rekaman tersedia dalam layer BNPB':'Tidak ada rekaman untuk provinsi ini';$('detail-date').textContent=r?'Pembaruan BNPB: '+formatDate(r.tgl_update):'Ketiadaan rekaman tidak berarti tidak ada karhutla.';
+    const r=state.records.find(x=>norm(x.provinsi)===norm(name));$('detail-coverage').textContent=r?'Rekaman tersedia dalam layer BNPB':'Tidak ada rekaman untuk provinsi ini';$('detail-date').textContent=r?'Tanggal data: '+(r.tgl_update?formatDate(r.tgl_update):'tidak tercantum dalam CSV'):'Ketiadaan rekaman tidak berarti tidak ada karhutla.';
     const rows=[['Total hotspot',r?displayedHotspot(r):null],['Hotspot tinggi',r?.hotspot_tinggi],['Hotspot sedang',r?.hotspot_sedang],['Hotspot rendah',r?.hotspot_rendah],['Luas terbakar (ha)',r?.luas_lahan_terbakar_sipongi_2026],['Personel gabungan',r?.total_personil_gabungan],['Sortie water bombing',r?.sortie_water_bombing]];
     $('detail-list').replaceChildren();rows.forEach(([key,val])=>{const node=document.createElement('div');const label=document.createElement('span'),str=document.createElement('strong');label.textContent=key;str.textContent=fmt(val);node.append(label,str);$('detail-list').append(node);});
   }
@@ -132,19 +132,20 @@
     }));
     let snapshot=null;
     try{
-      const json=await fetchJson('data/karhutla.json?rev=20261103',4500);
+      const json=await fetchJson('data/karhutla.json?rev=20261103b',4500);
       const records=parseRecords(json);
       if(records.length){
         const dates=records.map(r=>String(r.tgl_update||'')).filter(Boolean).sort();
-        snapshot={records,source:'CSV BNPB · '+(json.reference_date||'tanggal tidak tersedia'),latest:dates.at(-1)||'',fetched:json.fetched_at||null};
+        snapshot={records,source:'CSV resmi BNPB (tanggal data tidak tercantum)',latest:dates.at(-1)||'',fetched:null};
       }
     }catch(error){console.warn('Snapshot BNPB tidak tersedia:',error);}
-    const available=[...checks.filter(x=>x.status==='fulfilled').map(x=>x.value),...(snapshot?[snapshot]:[])].sort((x,y)=>y.latest.localeCompare(x.latest));
+    // The official downloaded CSV has no reporting-date column. Do not let an older API replace its values merely because it has a date.
+    const available=snapshot?[snapshot]:checks.filter(x=>x.status==='fulfilled').map(x=>x.value).sort((x,y)=>y.latest.localeCompare(x.latest));
     if(available.length){
       const best=available[0];
       state.records=best.records;state.source=best.source;state.fetched=best.fetched;
       setStatus('ok',best.source+' · '+best.records.length+' provinsi');
-      if(userTriggered)toast('Sumber '+best.source+' berhasil dimuat. Tanggal data: '+formatDate(best.latest));
+      if(userTriggered)toast('Data '+best.source+' berhasil dimuat.');
     }else{
       try{
         const json=await fetchJson('data/karhutla.json',4500);
