@@ -5,6 +5,7 @@
 (() => {
   'use strict';
   const BNPB_URL = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3/query';
+  const BNPB_V2_URL = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_tabeldata_karhutla_prov_2026_v2/MapServer/3/query';
   const BIG_URL = 'https://geoservices.big.go.id/gis/rest/services/STIG/Batas_Provinsi/MapServer/0/query';
   const FALLBACK_GEO = 'https://cdn.jsdelivr.net/gh/AlfianAliM/Indonesia-GeoJSON@master/provinsi.geojson';
   const PROVINCES = ['Riau','Jambi','Sumatera Selatan','Kalimantan Barat','Kalimantan Tengah','Kalimantan Selatan'];
@@ -117,9 +118,40 @@
   }
   function csvCell(x){return '"'+String(x??'').replaceAll('"','""')+'"';}
   function download(format){const rows=filteredRecords();if(!rows.length){toast('Data BNPB belum tersedia untuk diunduh.');return;}const fields=['provinsi','tgl_update','total_hotspot','hotspot_rendah','hotspot_sedang','hotspot_tinggi','luas_lahan_terbakar_sipongi_2026','total_personil_gabungan','sortie_water_bombing'];const payload=format==='json'?JSON.stringify({source:'BNPB 2026 Karhutla MapServer/3',notice:'Cakupan terbatas; bukan total nasional',fetched_at:state.fetched,records:rows},null,2):'\ufeff'+[fields.join(','),...rows.map(r=>fields.map(f=>csvCell(r[f])).join(','))].join('\r\n');const blob=new Blob([payload],{type:format==='json'?'application/json;charset=utf-8':'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='karhutla-bnpb-2026-tercakup.'+format;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);}
-  async function loadBnpb(userTriggered=false){setStatus('pending','Menghubungkan BNPB');const url=new URL(BNPB_URL);url.search=new URLSearchParams({where:'1=1',outFields:FIELDS.join(','),returnGeometry:'false',f:'json',resultRecordCount:'2000'});let fallback=false;try{const json=await fetchJson(url.toString(),15000);const recs=parseRecords(json);if(!recs.length)throw new Error('Respons BNPB tidak berisi rekaman provinsi');state.records=recs;state.source='live';state.fetched=new Date().toISOString();setStatus('ok','BNPB · '+recs.length+' provinsi');if(userTriggered)toast('Data berhasil dimuat dari BNPB untuk '+recs.length+' provinsi.');}
-    catch(error){state.loadError=error.message;try{const json=await fetchJson('data/karhutla.json',4500);const recs=parseRecords(json);if(recs.length){state.records=recs;state.source='snapshot';state.fetched=json.fetched_at||null;setStatus('pending','Snapshot BNPB · '+recs.length+' provinsi');fallback=true;if(userTriggered)toast('API langsung tidak tersedia. Menggunakan snapshot BNPB.');}else throw Error('Snapshot kosong');}catch(_){state.records=[];state.source='';setStatus('err','Data belum tersedia');if(userTriggered)toast('API BNPB belum dapat diakses dari browser; data tidak direkayasa.');}}
-    render();if(!fallback && !state.records.length)console.warn('Koneksi BNPB tidak tersedia:',state.loadError);
+  async function loadBnpb(userTriggered=false){
+    setStatus('pending','Memeriksa data BNPB');
+    const endpoints=[{name:'BNPB v2',url:BNPB_V2_URL},{name:'BNPB utama',url:BNPB_URL}];
+    const checks=await Promise.allSettled(endpoints.map(async endpoint=>{
+      const url=new URL(endpoint.url);
+      url.search=new URLSearchParams({where:'1=1',outFields:FIELDS.join(','),returnGeometry:'false',f:'json',resultRecordCount:'2000'});
+      const response=await fetchJson(url.toString(),12000);
+      const records=parseRecords(response);
+      if(!records.length)throw Error('Tidak ada rekaman untuk enam provinsi');
+      const dates=records.map(r=>String(r.tgl_update||'')).filter(Boolean).sort();
+      return {records,source:endpoint.name,latest:dates.at(-1)||'',fetched:new Date().toISOString()};
+    }));
+    const available=checks.filter(x=>x.status==='fulfilled').map(x=>x.value).sort((x,y)=>y.latest.localeCompare(x.latest));
+    if(available.length){
+      const best=available[0];
+      state.records=best.records;state.source=best.source;state.fetched=best.fetched;
+      setStatus('ok',best.source+' · '+best.records.length+' provinsi');
+      if(userTriggered)toast('Sumber '+best.source+' berhasil dimuat. Tanggal data: '+formatDate(best.latest));
+    }else{
+      try{
+        const json=await fetchJson('data/karhutla.json',4500);
+        const records=parseRecords(json);
+        if(!records.length)throw Error('Snapshot kosong');
+        state.records=records;state.source='snapshot';state.fetched=json.fetched_at||null;
+        setStatus('pending','Snapshot BNPB · '+records.length+' provinsi');
+        if(userTriggered)toast('API belum tersedia; menggunakan snapshot terverifikasi.');
+      }catch(error){
+        state.records=[];state.source='';state.fetched=null;
+        setStatus('err','Data BNPB belum tersedia');
+        if(userTriggered)toast('Belum berhasil membaca API BNPB; data tidak direkayasa.');
+      }
+      console.warn('Kedua layanan BNPB tidak berhasil:',checks.map((x,i)=>({source:endpoints[i].name,error:x.status==='rejected'?String(x.reason):null})));
+    }
+    render();
   }
   async function initMap(){const loader=$('map-loading');if(typeof window.L==='undefined'){loader.innerHTML='<strong>Peta interaktif belum dapat dimuat</strong><small>Periksa koneksi ke pustaka Leaflet.</small>';return;}
     state.map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:4,maxZoom:12,preferCanvas:true}).setView([-2.5,118.5],5);
