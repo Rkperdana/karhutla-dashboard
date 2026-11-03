@@ -38,7 +38,15 @@ def main():
             print(f'Endpoint unavailable {base}: {exc}')
     if not candidates:
         raise RuntimeError('No verified province records from either BNPB endpoint')
-    _, selected_base, rows = max(candidates, key=lambda item:item[0])
+    newest, selected_base, rows = max(candidates, key=lambda item:item[0])
+    existing_path = ROOT / 'data' / 'karhutla.json'
+    if existing_path.exists():
+        existing = json.loads(existing_path.read_text(encoding='utf-8'))
+        existing_dates = [str(x.get('attributes', {}).get('tgl_update') or '') for x in existing.get('features', [])]
+        existing_newest = max(existing_dates, default='')
+        if existing_newest and newest < existing_newest:
+            print(f'Skipping stale API snapshot ({newest}); existing verified data is {existing_newest}')
+            return
     if not rows:
         raise RuntimeError('BNPB returned no named provinces; refusing to replace current snapshot')
     latest = {}
