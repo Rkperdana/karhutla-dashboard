@@ -106,7 +106,7 @@
   function recordFor(name){return state.records.find(r=>norm(r.provinsi)===norm(name));}
   function geoName(properties){const keys=['WADMPR','wadmpr','name','NAME_1','nama','provinsi','NAMA_PROV','PROVINSI','prov_name','province','NAMA','Propinsi'];for(const key of keys){if(typeof properties?.[key]==='string'&&properties[key].trim())return provinceName(properties[key]);}for(const [k,v] of Object.entries(properties||{})){if(typeof v==='string'&&canonical.has(norm(v)))return provinceName(v);}return ''}
   function renderMap(){if(!state.shapes)return;const max=Math.max(0,...state.records.map(r=>byMetric(r,state.mapMode)).filter(v=>v!==null));state.shapes.eachLayer(layer=>{const name=geoName(layer.feature?.properties),rec=recordFor(name),value=rec?byMetric(rec,state.mapMode):null;layer.setStyle({color:state.selected===name?'#173b62':'#ffffff',weight:state.showBoundaries?(state.selected===name?2.7:1.2):0,fillColor:valColor(value,max),fillOpacity:value===null?.75:.96});if(layer.bringToFront&&state.selected===name)layer.bringToFront();});$('legend-title').textContent=state.mapMode==='area'?'Luas terbakar terlapor (ha)':'Jumlah hotspot terlapor';$('map-caption-text').textContent='Warna menunjukkan '+(state.mapMode==='area'?'luas terbakar':'jumlah hotspot')+', bukan tingkat risiko kebakaran.';}
-  function render(){setScope();renderKpis();renderRanking();renderDonut();renderTable();renderDetails();renderMap();}
+  function render(){setScope();renderKpis();renderRanking();renderDonut();renderTable();renderDetails();renderMap();renderFullData();}
   function chooseProvince(name){const clean=provinceName(name);state.selected=clean;state.province=clean;$('province-select').value=clean;$('map-search').value='';$('search-results').hidden=true;render();if(state.shapes){let match;state.shapes.eachLayer(layer=>{if(norm(geoName(layer.feature?.properties))===norm(clean))match=layer;});if(match&&match.getBounds)state.map.fitBounds(match.getBounds(),{maxZoom:7,padding:[26,26],animate:true});}closeFilter();}
   function clearProvince(){state.province='';state.selected='';$('province-select').value='';render();if(state.map)state.map.flyTo([-2.5,118.3],5,{animate:true,duration:.6});}
   function changeLayer(mode){state.mapMode=mode;document.querySelectorAll('input[name="map-mode"]').forEach(e=>e.checked=e.value===mode);renderMap();}
@@ -219,6 +219,22 @@
     }}).addTo(state.map);
     state.shapes=layer;if(layer.getLayers().length){markers.clearLayers();state.map.invalidateSize();state.map.fitBounds(layer.getBounds(),{padding:[32,34],maxZoom:7,animate:false});}renderMap();
   }
-  function start(){installIcons();fillProvinceOptions();installEvents();render();initMap();loadBnpb();}
+  function renderFullData(){
+    const table=document.getElementById('full-data-table'),province=document.getElementById('full-data-province'),category=document.getElementById('full-data-category');
+    if(!table||!province||!category)return;
+    const records=state.records||[],chosen=province.value;
+    province.replaceChildren(new Option('Semua provinsi',''));
+    records.forEach(r=>province.add(new Option(r.provinsi,r.provinsi)));
+    province.value=chosen;
+    const selected=records.filter(r=>!province.value||r.provinsi===province.value);
+    const fields=[...new Set(records.flatMap(r=>Object.keys(r)))].filter(k=>!['provinsi','tgl_update'].includes(k));
+    const group=k=>/rekomendasi|kesimpulan/.test(k)?'notes':/udara|omc|wb_|water_bombing|sortie|patroli|standby|jarak_pandang|kualitas_udara|bahan_semai/.test(k)?'air':/personil|personel|tni|polri|pemda|relawan|manggala|mpa|satpol|perusahaan|ditangani|dipadamkan/.test(k)?'response':'fire';
+    const visible=fields.filter(k=>category.value==='all'||group(k)===category.value);
+    const header=document.createElement('tr');
+    ['Indikator',...selected.map(r=>r.provinsi)].forEach(name=>{const cell=document.createElement('th');cell.textContent=name;cell.style.cssText='position:sticky;top:0;background:#e8eef6;color:#173253;text-align:left;padding:12px;border-bottom:1px solid #d4dfec;min-width:150px;z-index:2';header.append(cell)});
+    table.tHead.replaceChildren(header);table.tBodies[0].replaceChildren();
+    visible.forEach((k,i)=>{const tr=document.createElement('tr'),label=document.createElement('th');label.textContent=k.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());label.style.cssText='text-align:left;padding:10px 12px;min-width:220px;color:#20334c;background:'+(i%2?'#f2f5fa':'#fff');tr.append(label);selected.forEach(r=>{const td=document.createElement('td'),v=r[k];td.textContent=v===null||v===undefined||v===''?'—':typeof v==='number'?fmt(v):String(v);td.style.cssText='padding:10px 12px;min-width:155px;vertical-align:top;white-space:'+(typeof v==='string'&&v.length>70?'normal':'nowrap')+';color:#20334c;background:'+(i%2?'#f2f5fa':'#fff');tr.append(td)});table.tBodies[0].append(tr)});
+  }
+  function start(){installIcons();fillProvinceOptions();installEvents();['full-data-province','full-data-category'].forEach(id=>document.getElementById(id)?.addEventListener('change',renderFullData));render();initMap();loadBnpb();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
