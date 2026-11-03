@@ -62,10 +62,13 @@
   function setStatus(type, message){const el=$('source-status');el.className='source-status '+type;$('source-status-text').textContent=message;}
   function setScope(){
     const n=state.records.length;
-    $('scope-caption').textContent=n?`${n} provinsi dalam respons BNPB · bukan total nasional`:'Cakupan belum tersedia';
+    const dates=state.records.map(r=>r.tgl_update).filter(Boolean).sort();
+    const first=dates[0], lastDate=dates.at(-1);
+    const period=lastDate?(first!==lastDate?`${formatDate(first)}–${formatDate(lastDate)}`:formatDate(lastDate)):'belum tersedia';
+    $('scope-caption').textContent=n?`${n} provinsi · Data per ${period} · bukan total nasional`:'Data per: belum tersedia';
     $('scope-notice').textContent=n?`${n} provinsi memiliki rekaman dalam layer ini. Angka yang ditampilkan merupakan agregat wilayah tercakup, bukan total nasional. Nilai kosong bukan nol.`:'Hanya provinsi yang tersedia pada layanan BNPB masuk perhitungan. Wilayah tanpa data tidak dianggap nol.';
     let last=state.records.map(r=>r.tgl_update).filter(Boolean).sort().at(-1);
-    $('footer-update').textContent='Tanggal pembaruan data: '+formatDate(last);
+    $('footer-update').textContent='Tanggal rujukan BNPB: '+formatDate(last)+(state.fetched?' · Diambil: '+new Date(state.fetched).toLocaleString('id-ID',{timeZone:'Asia/Jakarta',dateStyle:'medium',timeStyle:'short'})+' WIB':'');
   }
   function filteredRecords(){return state.province?state.records.filter(r=>norm(r.provinsi)===norm(state.province)):state.records;}
   function displayedHotspot(rec){const sel=[...state.levels];if(sel.length===0)return null;if(sel.length===3 && rec.total_hotspot!==null)return rec.total_hotspot;const vals=sel.map(k=>rec['hotspot_'+k]);return vals.some(v=>v===null||v===undefined)?null:vals.reduce((a,b)=>a+b,0);}
@@ -122,15 +125,22 @@
     state.map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:4,maxZoom:12,preferCanvas:true}).setView([-2.5,118.5],5);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(state.map);
     L.control.zoom({position:'bottomright'}).addTo(state.map);
-    const options=[{name:'BIG',url:new URL(BIG_URL)},{name:'GeoJSON',url:FALLBACK_GEO}];options[0].url.search=new URLSearchParams({where:'1=1',outFields:'WADMPR',returnGeometry:'true',outSR:'4326',geometryPrecision:'3',maxAllowableOffset:'0.008',f:'geojson'});
-    let geo;
-    for(const opt of options){try{const json=await fetchJson(String(opt.url),opt.name==='BIG'?18000:24000);if(json?.type!=='FeatureCollection'||!Array.isArray(json.features)||json.features.length<20)throw new Error('Layer batas tidak lengkap');geo=json;break;}catch(err){console.warn('Batas provinsi',opt.name,err.message);}}
-    if(!geo){loader.innerHTML='<strong>Geometri provinsi belum tersedia</strong><small>Basemap aktif. Layer batas dapat terhubung ketika server geospasial merespons.</small>';return;}
-    state.geoFeatures=geo.features;state.geoReady=true;
+    const bigUrl=new URL(BIG_URL);
+     bigUrl.search=new URLSearchParams({where:'1=1',outFields:'WADMPR',returnGeometry:'true',outSR:'4326',geometryPrecision:'3',maxAllowableOffset:'0.008',f:'geojson'});
+     const sources=[String(bigUrl),FALLBACK_GEO];
+     const attempts=sources.map(url=>fetchJson(url,8500).then(json=>{
+       if(json?.type!=='FeatureCollection'||!Array.isArray(json.features)||json.features.length<6)throw Error('Geometri tidak lengkap');
+       if(!json.features.some(f=>canonical.has(norm(geoName(f.properties)))))throw Error('Nama provinsi tidak dikenali');
+       return json;
+     }));
+     let geo;
+     try{geo=await Promise.any(attempts);}
+     catch(err){loader.innerHTML='<strong>Batas provinsi belum tersedia</strong><small>Peta dasar tetap dapat digunakan. Muat ulang untuk mencoba lagi.</small>';return;}
+     state.geoFeatures=geo.features;state.geoReady=true;
     const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
       const name=geoName(feature.properties);if(name){polygon.bindTooltip(name,{direction:'top',sticky:true});polygon.on('click',()=>chooseProvince(name));polygon.on('mouseover',()=>polygon.setStyle({weight:2.5,color:'#fff3bf'}));polygon.on('mouseout',()=>renderMap());}
     }}).addTo(state.map);
-    state.shapes=layer;loader.hidden=true;state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});renderMap();
+    state.shapes=layer;loader.hidden=true;if(layer.getLayers().length)state.map.fitBounds(layer.getBounds(),{padding:[18,20],maxZoom:5,animate:false});renderMap();
   }
   function start(){installIcons();fillProvinceOptions();installEvents();render();initMap();loadBnpb();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
