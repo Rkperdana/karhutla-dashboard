@@ -1,16 +1,18 @@
 {
-  "source": "BNPB Dashboard Informasi Penanganan Karhutla — CSV Unduh Data (enam provinsi)",
-  "fetched_at": "2026-11-03",
-  "scope_note": "CSV diunduh 3 November 2026; file tidak memiliki tanggal rujukan per provinsi. Jangan menganggap tanggal dashboard sebagai tanggal setiap rekaman.",
+  "source": "BNPB Dashboard Informasi Penanganan Karhutla — ekspor XLSX semua provinsi (diunggah 3 November 2026)",
+  "fetched_at": null,
+  "reference_date": null,
+  "scope_note": "Enam provinsi sesuai berkas XLSX. Berkas tidak mencantumkan tanggal per provinsi. Kolom kesimpulan berbeda dengan data terstruktur; indikator memakai data terstruktur. Sel kosong tetap null.",
   "features": [
     {
       "attributes": {
         "provinsi": "Riau",
         "tgl_update": null,
-        "total_hotspot": 4,
         "hotspot_rendah": 0,
         "hotspot_sedang": null,
         "hotspot_tinggi": 0,
+        "total_hotspot": 4,
+        "fire_spot": 2,
         "luas_lahan_terbakar_sipongi_2026": 20696.31,
         "total_personil_gabungan": 14837,
         "sortie_water_bombing": 0
@@ -20,10 +22,11 @@
       "attributes": {
         "provinsi": "Jambi",
         "tgl_update": null,
-        "total_hotspot": 13,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
         "hotspot_tinggi": null,
+        "total_hotspot": 13,
+        "fire_spot": 6,
         "luas_lahan_terbakar_sipongi_2026": 4852.75,
         "total_personil_gabungan": 5984,
         "sortie_water_bombing": 1
@@ -33,10 +36,11 @@
       "attributes": {
         "provinsi": "Sumatera Selatan",
         "tgl_update": null,
-        "total_hotspot": 85,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
         "hotspot_tinggi": null,
+        "total_hotspot": 85,
+        "fire_spot": 11,
         "luas_lahan_terbakar_sipongi_2026": 1926.23,
         "total_personil_gabungan": 12285,
         "sortie_water_bombing": 4
@@ -46,10 +50,11 @@
       "attributes": {
         "provinsi": "Kalimantan Barat",
         "tgl_update": null,
-        "total_hotspot": 14,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
         "hotspot_tinggi": null,
+        "total_hotspot": 14,
+        "fire_spot": 5,
         "luas_lahan_terbakar_sipongi_2026": 38310.89,
         "total_personil_gabungan": 14458,
         "sortie_water_bombing": 2
@@ -59,10 +64,11 @@
       "attributes": {
         "provinsi": "Kalimantan Tengah",
         "tgl_update": null,
-        "total_hotspot": 367,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
         "hotspot_tinggi": null,
+        "total_hotspot": 367,
+        "fire_spot": 107,
         "luas_lahan_terbakar_sipongi_2026": 24402.56,
         "total_personil_gabungan": 16387,
         "sortie_water_bombing": 10
@@ -72,10 +78,11 @@
       "attributes": {
         "provinsi": "Kalimantan Selatan",
         "tgl_update": null,
-        "total_hotspot": 105,
         "hotspot_rendah": null,
         "hotspot_sedang": null,
         "hotspot_tinggi": null,
+        "total_hotspot": 105,
+        "fire_spot": 18,
         "luas_lahan_terbakar_sipongi_2026": 8019.63,
         "total_personil_gabungan": 7927,
         "sortie_water_bombing": 3
