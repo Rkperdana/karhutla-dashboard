@@ -183,17 +183,19 @@
     loader.hidden=true;
     setTimeout(()=>state.map?.invalidateSize(),100);
 
-    const bigUrl=new URL(BIG_URL);
-     bigUrl.search=new URLSearchParams({where:'1=1',outFields:'WADMPR',returnGeometry:'true',outSR:'4326',geometryPrecision:'3',maxAllowableOffset:'0.008',f:'geojson'});
-     const sources=[String(bigUrl),FALLBACK_GEO];
-     const attempts=sources.map(url=>fetchJson(url,8500).then(json=>{
-       if(json?.type!=='FeatureCollection'||!Array.isArray(json.features)||json.features.length<6)throw Error('Geometri tidak lengkap');
-       if(!json.features.some(f=>canonical.has(norm(geoName(f.properties)))))throw Error('Nama provinsi tidak dikenali');
-       return json;
-     }));
-     let geo;
-     try{geo=await Promise.any(attempts);}
-     catch(err){console.warn('Batas provinsi gagal; penanda provinsi tetap aktif.',err);$('map-caption-text').textContent='Penanda menunjukkan lokasi perkiraan provinsi, bukan titik hotspot. Batas provinsi belum tersedia.';return;}
+    let geo;
+    try {
+      geo=await fetchJson('data/provinsi-prioritas.geojson?v=20261103',12000);
+      if(geo?.type!=='FeatureCollection'||!Array.isArray(geo.features)||geo.features.length!==6)
+        throw Error('GeoJSON harus berisi enam provinsi');
+      const present=new Set(geo.features.map(f=>norm(geoName(f.properties))));
+      if(PROVINCES.some(p=>!present.has(norm(p))))throw Error('Nama provinsi dalam GeoJSON tidak lengkap');
+    } catch(err) {
+      console.error('GeoJSON lokal tidak berhasil dimuat:',err);
+      loader.hidden=false;
+      loader.innerHTML='<strong>Peta batas provinsi belum termuat</strong><small>Periksa file GeoJSON pada repository.</small>';
+      return;
+    }
      state.geoFeatures=geo.features;state.geoReady=true;
     const layer=L.geoJSON({type:'FeatureCollection',features:geo.features.filter(f=>canonical.has(norm(geoName(f.properties))))},{renderer:L.canvas({padding:0.25}),style:()=>({color:'#d4dde5',weight:1.2,fillOpacity:.35,fillColor:'#7b8c9c'}),onEachFeature:(feature,polygon)=>{
       const name=geoName(feature.properties);if(name){polygon.bindTooltip(name,{direction:'top',sticky:true});polygon.on('click',()=>chooseProvince(name));polygon.on('mouseover',()=>polygon.setStyle({weight:2.5,color:'#fff3bf'}));polygon.on('mouseout',()=>renderMap());}
