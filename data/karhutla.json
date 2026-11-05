@@ -1,6 +1,6 @@
 {
   "source": "https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3",
-  "fetched_at": "2026-11-04T11:10:08.124883+00:00",
+  "fetched_at": "2026-11-05T11:10:31.142611+00:00",
   "scope_note": "Six priority provinces only; not national totals; missing values are not zero",
   "features": [
     {
