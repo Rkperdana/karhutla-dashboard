@@ -53,13 +53,49 @@ html[data-theme="dark"] .eyebrow{background:#3a281f;border-color:#6b4531;color:#
 html[data-theme="dark"] .download{background:#315e9a;color:#fff}
 html[data-theme="dark"] .leaflet-control-zoom a{background:#1d3047;color:#eaf2ff;border-color:#36516e}
 @media(max-width:600px){.header-actions{gap:6px}.theme-toggle{padding:8px 9px}.theme-toggle span{display:none}}
-.ranking-tabs{margin:2px 0 20px}.ranking-tabs .tab{flex:1;white-space:nowrap}.ranking-tabs .tab.active{background:#173e73;color:#fff;border-color:#173e73}@media(max-width:600px){.ranking-tabs .tab{font-size:11px;padding:9px 7px}}</style></head><body>
+.ranking-tabs{margin:2px 0 20px}.ranking-tabs .tab{flex:1;white-space:nowrap}.ranking-tabs .tab.active{background:#173e73;color:#fff;border-color:#173e73}@media(max-width:600px){.ranking-tabs .tab{font-size:11px;padding:9px 7px}}
+/* Penelusuran seluruh kolom resmi BNPB */
+.explorer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.explorer-actions input,.explorer-select{font:inherit;border:1px solid #dbe4ef;border-radius:10px;padding:11px 13px;color:#29486d;background:#fff}
+.explorer-actions input{min-width:190px;flex:1;max-width:100%}
+.explorer-select{max-width:280px}
+.explorer-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.indicator-group{border:1px solid #e0e8f1;border-radius:14px;padding:17px;background:#f9fbfe;min-width:0}
+.indicator-group h3{font-size:14px;color:#18375d;margin:0 0 12px}
+.indicator-row{display:grid;grid-template-columns:minmax(130px,1.2fr) minmax(90px,.8fr);gap:12px;border-top:1px solid #e4eaf2;padding:9px 0;align-items:start}
+.indicator-row dt{color:#5d7189;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.indicator-row dd{margin:0;color:#16385d;font-size:12px;font-weight:700;text-align:right;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}
+.indicator-row dd.long-value{font-weight:500;text-align:left;grid-column:1/-1;background:#f1f5fb;padding:10px;border-radius:8px}
+.indicator-row dd.is-missing{color:#96a4b4}
+.explorer-note{font-size:12px;line-height:1.7;color:#71849a;margin:15px 0 0}
+html[data-theme="dark"] .indicator-group{background:#182638;border-color:#30435b}
+html[data-theme="dark"] .indicator-row{border-color:#30435b}
+html[data-theme="dark"] .indicator-group h3,html[data-theme="dark"] .indicator-row dd{color:#e9f2ff}
+html[data-theme="dark"] .indicator-row dt,html[data-theme="dark"] .explorer-note{color:#abc0d8}
+html[data-theme="dark"] .indicator-row dd.long-value{background:#203248;color:#dce9fb}
+html[data-theme="dark"] .explorer-actions input,html[data-theme="dark"] .explorer-select{color:#edf4ff;background:#1a2a3d;border-color:#3a4d63}
+@media(max-width:800px){.explorer-groups{grid-template-columns:1fr}.explorer-select{max-width:100%}}
+@media(max-width:600px){.indicator-group{padding:13px}.indicator-row{grid-template-columns:minmax(100px,1fr) minmax(80px,.8fr);gap:8px}.explorer-actions input,.explorer-actions button{width:100%}}
+</style></head><body>
 <header class="top"><div class="topin"><div class="brand">KARHUTLA<b> / </b>MONITOR</div><nav class="nav"><a href="#operasional">Operasional</a><a href="#peta">Peta</a></nav><div class="header-actions"><span class="pill">BNPB · 2026</span><button type="button" id="theme-toggle" class="theme-toggle" aria-label="Aktifkan mode gelap" aria-pressed="false">☾ <span>Dark</span></button></div></div></header>
 <main class="shell"><section class="hero"><div><div class="eyebrow">Indonesia · Monitoring Center</div><h1>Karhutla Monitoring Center<br>Indonesia 2026</h1><p>Eksplorasi indikator karhutla di enam provinsi prioritas berdasarkan data ekspor BNPB.<br>Setiap indikator ditampilkan sesuai kolom aslinya, tanpa estimasi atau angka rekaan.</p></div><div class="source"><strong>Sumber data: BNPB, per 5 November 2026</strong></div></section>
 <section class="kpis" aria-label="Indikator utama"><div class="kpi"><span class="dot"></span><div class="label">Total hotspot</div><div class="value" id="hotspot">—</div><small>6 provinsi · total kolom hotspot</small></div><div class="kpi"><span class="dot" style="background:#edaa54"></span><div class="label">Lahan terbakar indikatif</div><div class="value" id="indicative">—</div><small>Hektare · indikator SiPongi 2026</small></div><div class="kpi"><span class="dot" style="background:#648bca"></span><div class="label">Lahan terbakar harian</div><div class="value" id="daily">—</div><small>Hektare · kolom terpisah</small></div><div class="kpi"><span class="dot" style="background:#54b39c"></span><div class="label">Total personel gabungan</div><div class="value" id="people">—</div><small>Orang · 6 provinsi</small></div></section>
-<section class="panel anchor" id="operasional" style="margin-top:18px"><div class="heading"><div><h2>Ringkasan Operasional Penanganan Karhutla</h2><div class="sub">Indikator operasional dari ekspor BNPB · angka kosong tidak dihitung sebagai nol</div></div><select id="ops-province" style="padding:10px;border:1px solid #dfe6ef;border-radius:9px;background:white"><option value="">Seluruh 6 provinsi</option></select></div><div class="ops-grid"><div class="ops-card"><span>Fire spot</span><b id="ops-fire">—</b><small>Jumlah titik api</small></div><div class="ops-card"><span>Lahan belum padam</span><b id="ops-unextinguished">—</b><small>Centurisk · satuan sesuai sumber</small></div><div class="ops-card"><span>Luas penanganan darat</span><b id="ops-land">—</b><small>Hektare</small></div><div class="ops-card"><span>Luas penanganan udara</span><b id="ops-air">—</b><small>Hektare</small></div><div class="ops-card"><span>Sortie water bombing</span><b id="ops-wb">—</b><small>Sortie</small></div><div class="ops-card"><span>Volume water bombing</span><b id="ops-volume">—</b><small>Liter</small></div><div class="ops-card"><span>Sortie OMC</span><b id="ops-omc">—</b><small>Sortie</small></div><div class="ops-card"><span>Kabupaten/kota terdampak</span><b id="ops-district">—</b><small>Jumlah wilayah</small></div></div></section>
-<section class="main"><article class="panel anchor" id="peta"><div class="heading"><div><h2>Peta Karhutla Indonesia</h2><div class="sub">Seluruh provinsi ditampilkan · wilayah tanpa data berwarna putih</div></div><div class="tabs"><button class="tab active" data-metric="total_hotspot">Hotspot</button><button class="tab" data-metric="luas_lahan_terbakar_sipongi_2026">Lahan indikatif</button><button class="tab" data-metric="lahan_terbakar_harian_ha">Lahan harian</button></div></div><div class="mapwrap"><div class="map" id="map"></div><div class="map-note" id="map-note">Memuat batas wilayah provinsi…</div></div><div class="legend"><span>Intensitas relatif:</span><span class="swatch" style="background:#ffe4ac"></span>Rendah<span class="swatch" style="background:#f4a96c"></span>Sedang<span class="swatch" style="background:#e66c52"></span>Tinggi<span class="swatch" style="background:#b63842"></span>Tertinggi <span class="muted">· warna hanya perbandingan antarprovinsi</span></div></article>
-<article class="panel anchor" id="peringkat"><div class="heading"><div><h2>Peringkat Provinsi</h2><div class="sub" id="rank-title">Bandingkan enam provinsi berdasarkan tiga indikator</div></div></div><div class="tabs ranking-tabs" role="group" aria-label="Pilih indikator peringkat"><button class="tab rank-tab active" data-rank="total_hotspot">Hotspot</button><button class="tab rank-tab" data-rank="luas_lahan_terbakar_sipongi_2026">Lahan terbakar</button><button class="tab rank-tab" data-rank="lahan_terbakar_harian_ha">Lahan harian</button></div><div id="ranking"></div><div class="selection" id="selection">Pilih provinsi pada peta atau peringkat untuk melihat indikatornya.</div><div class="side-stat"><div class="mini"><span>Fire spot</span><b id="sel-fire">—</b></div><div class="mini"><span>Sortie water bombing</span><b id="sel-sorties">—</b></div><div class="mini"><span>Lahan indikatif (ha)</span><b id="sel-indicative">—</b></div><div class="mini"><span>Lahan harian (ha)</span><b id="sel-daily">—</b></div></div><button class="download" id="view-province">Lihat indikator operasional ↑</button></article></section>
+<section class="panel anchor" id="operasional" style="margin-top:18px"><div class="heading"><div><h2>Ringkasan Operasional Penanganan Karhutla</h2><div class="sub">Indikator operasional dari ekspor BNPB · angka kosong tidak dihitung sebagai nol</div></div><select id="ops-province" style="padding:10px;border:1px solid #dfe6ef;border-radius:9px;background:white"><option value="">Seluruh 6 provinsi</option></select></div><div class="ops-grid"><div class="ops-card"><span>Fire spot</span><b id="ops-fire">—</b><small>Jumlah titik api</small></div><div class="ops-card"><span>Patroli udara</span><b id="ops-unextinguished">—</b><small>Sortie patroli udara</small></div><div class="ops-card"><span>Luas ditangani lewat operasi darat</span><b id="ops-land">—</b><small>Hektare</small></div><div class="ops-card"><span>Luas ditangani lewat operasi udara</span><b id="ops-air">—</b><small>Hektare</small></div><div class="ops-card"><span>Sortie water bombing</span><b id="ops-wb">—</b><small>Sortie</small></div><div class="ops-card"><span>Volume water bombing harian</span><b id="ops-volume">—</b><small>Kolom volume_wb_harian · satuan sumber</small></div><div class="ops-card"><span>Sortie OMC</span><b id="ops-omc">—</b><small>Sortie</small></div><div class="ops-card"><span>Kabupaten ditangani</span><b id="ops-district">—</b><small>Jumlah wilayah</small></div></div></section>
+<section class="main"><article class="panel anchor" id="peta"><div class="heading"><div><h2>Peta Karhutla Indonesia</h2><div class="sub">Seluruh provinsi ditampilkan · wilayah tanpa data berwarna putih</div></div><div class="tabs"><button class="tab active" data-metric="total_hotspot">Hotspot</button><button class="tab" data-metric="luas_lahan_terbakar_sipongi_2026">Lahan indikatif</button><button class="tab" data-metric="today_luas_terbakar">Lahan harian</button></div></div><div class="mapwrap"><div class="map" id="map"></div><div class="map-note" id="map-note">Memuat batas wilayah provinsi…</div></div><div class="legend"><span>Intensitas relatif:</span><span class="swatch" style="background:#ffe4ac"></span>Rendah<span class="swatch" style="background:#f4a96c"></span>Sedang<span class="swatch" style="background:#e66c52"></span>Tinggi<span class="swatch" style="background:#b63842"></span>Tertinggi <span class="muted">· warna hanya perbandingan antarprovinsi</span></div></article>
+<article class="panel anchor" id="peringkat"><div class="heading"><div><h2>Peringkat Provinsi</h2><div class="sub" id="rank-title">Bandingkan enam provinsi berdasarkan tiga indikator</div></div></div><div class="tabs ranking-tabs" role="group" aria-label="Pilih indikator peringkat"><button class="tab rank-tab active" data-rank="total_hotspot">Hotspot</button><button class="tab rank-tab" data-rank="luas_lahan_terbakar_sipongi_2026">Lahan terbakar</button><button class="tab rank-tab" data-rank="today_luas_terbakar">Lahan harian</button></div><div id="ranking"></div><div class="selection" id="selection">Pilih provinsi pada peta atau peringkat untuk melihat indikatornya.</div><div class="side-stat"><div class="mini"><span>Fire spot</span><b id="sel-fire">—</b></div><div class="mini"><span>Sortie water bombing</span><b id="sel-sorties">—</b></div><div class="mini"><span>Lahan indikatif (ha)</span><b id="sel-indicative">—</b></div><div class="mini"><span>Lahan harian (ha)</span><b id="sel-daily">—</b></div></div><button class="download" id="view-province">Lihat indikator operasional ↑</button></article></section>
+
+<section class="panel anchor" id="eksplorasi" style="margin-top:18px" aria-label="Seluruh indikator BNPB">
+  <div class="heading">
+    <div><h2>Eksplorasi Seluruh Indikator BNPB</h2><div class="sub" id="explorer-summary">Memuat kolom lengkap dari snapshot BNPB…</div></div>
+    <select id="explorer-province" class="explorer-select" aria-label="Pilih provinsi untuk seluruh indikator"><option value="">Pilih provinsi</option></select>
+  </div>
+  <div class="explorer-actions">
+    <input id="explorer-search" type="search" placeholder="Cari indikator, mis. fire spot, relawan, OMC…" aria-label="Cari indikator BNPB">
+    <button id="download-all" class="download" type="button">Unduh data JSON lengkap</button>
+  </div>
+  <div id="explorer-groups" class="explorer-groups"><p class="muted">Memuat data…</p></div>
+  <p id="explorer-note" class="explorer-note">Nilai kosong ditandai “—”, bukan angka nol. Catatan dan rekomendasi ditampilkan apa adanya sesuai sumber BNPB.</p>
+</section>
 </main>
 <script>
 (()=>{
@@ -67,18 +103,86 @@ html[data-theme="dark"] .leaflet-control-zoom a{background:#1d3047;color:#eaf2ff
 const themeKey='karhutla-monitor-theme';let theme='light';try{theme=localStorage.getItem(themeKey)||'light'}catch(e){}if(theme!=='dark'&&theme!=='light')theme='light';document.documentElement.dataset.theme=theme;
 const $=id=>document.getElementById(id),nf=new Intl.NumberFormat('id-ID',{maximumFractionDigits:2});
 const provinces=['Riau','Jambi','Sumatera Selatan','Kalimantan Barat','Kalimantan Tengah','Kalimantan Selatan'];
-const labels={total_hotspot:'Total hotspot',hotspot_rendah:'Hotspot rendah',hotspot_sedang:'Hotspot sedang',hotspot_tinggi:'Hotspot tinggi',fire_spot:'Fire spot',luas_lahan_terbakar_sipongi_2026:'Lahan terbakar indikatif SiPongi 2026 (ha)',lahan_terbakar_harian_ha:'Lahan terbakar harian (ha)',luas_lahan_terbakar_centurisk:'Luas lahan terbakar (Centurisk)',luas_lahan_belum_padam_centurisk:'Luas lahan belum padam (Centurisk)',total_personil_gabungan:'Total personel gabungan',sortie_water_bombing:'Sortie water bombing',kualitas_udara_pm25:'Kualitas udara PM2.5',jarak_pandang_bandara_km:'Jarak pandang bandara (km)',rekomendasi:'Rekomendasi',kesimpulan:'Kesimpulan'};
+const labels={total_hotspot:'Total hotspot',hotspot_rendah:'Hotspot rendah',hotspot_sedang:'Hotspot sedang',hotspot_tinggi:'Hotspot tinggi',fire_spot:'Fire spot',luas_lahan_terbakar_sipongi_2026:'Lahan terbakar indikatif SiPongi 2026 (ha)',today_luas_terbakar:'Lahan terbakar harian (ha)',luas_lahan_terbakar_centurisk:'Luas lahan terbakar (Centurisk)',luas_lahan_belum_padam_centurisk:'Luas lahan belum padam (Centurisk)',total_personil_gabungan:'Total personel gabungan',sortie_water_bombing:'Sortie water bombing',kualitas_udara_pm25:'Kualitas udara PM2.5',jarak_pandang_bandara_km:'Jarak pandang bandara (km)',rekomendasi:'Rekomendasi',kesimpulan:'Kesimpulan'};
 let records=[],metric='total_hotspot',map,geoLayer,selected='';
 function setTheme(next){theme=next;document.documentElement.dataset.theme=next;const btn=$('theme-toggle');btn.setAttribute('aria-pressed',String(next==='dark'));btn.setAttribute('aria-label',next==='dark'?'Aktifkan mode terang':'Aktifkan mode gelap');btn.innerHTML=next==='dark'?'☀ <span>Light</span>':'☾ <span>Dark</span>';try{localStorage.setItem(themeKey,next)}catch(e){}}
 const fmt=v=>v===null||v===undefined||v===''?'—':typeof v==='number'?nf.format(v):String(v);
-const sum=k=>records.reduce((a,r)=>a+(typeof r[k]==='number'?r[k]:0),0);
+const sum=k=>{const values=records.map(r=>r[k]).filter(v=>typeof v==='number'&&Number.isFinite(v));return values.length?values.reduce((a,b)=>a+b,0):null};
 const label=k=>labels[k]||k.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
 const group=k=>/rekomendasi|kesimpulan/.test(k)?'notes':/udara|omc|wb_|water_bombing|sortie|patroli|standby|jarak_pandang|kualitas_udara|bahan_semai/.test(k)?'air':/personil|personel|tni|polri|pemda|relawan|manggala|mpa|satpol|perusahaan|ditangani|dipadamkan/.test(k)?'people':'fire';
 const color=(v,max)=>v===null||v===undefined?'#ffffff':v/max>.75?'#b63842':v/max>.4?'#e66c52':v/max>.15?'#f4a96c':'#ffe4ac';
 function setMetric(k){metric=k;document.querySelectorAll('[data-metric]').forEach(b=>b.classList.toggle('active',b.dataset.metric===k));paintMap()}
-function renderOps(){const chosen=$('ops-province').value;const rows=records.filter(r=>!chosen||r.provinsi===chosen);const fields=[['ops-fire','fire_spot'],['ops-unextinguished','luas_lahan_belum_padam_centurisk'],['ops-land','luas_lahan_ditangani_darat'],['ops-air','luas_lahan_ditangani_udara'],['ops-wb','sortie_water_bombing'],['ops-volume','volume_wb_liter'],['ops-omc','omc_sortie'],['ops-district','kabkot_terdampak']];fields.forEach(([id,key])=>{const nums=rows.map(r=>r[key]).filter(v=>typeof v==='number'&&Number.isFinite(v));$(id).textContent=nums.length?fmt(nums.reduce((a,b)=>a+b,0)):'—';});}
+function renderOps(){const chosen=$('ops-province').value;const rows=records.filter(r=>!chosen||r.provinsi===chosen);const fields=[['ops-fire','fire_spot'],['ops-unextinguished','sortie_patroli_udara'],['ops-land','luas_ditangani_ops_darat'],['ops-air','luas_ditangani_ops_udara'],['ops-wb','sortie_water_bombing'],['ops-volume','volume_wb_harian'],['ops-omc','sortie_omc'],['ops-district','jml_kabupaten_ditangani']];fields.forEach(([id,key])=>{const nums=rows.map(r=>r[key]).filter(v=>typeof v==='number'&&Number.isFinite(v));$(id).textContent=nums.length?fmt(nums.reduce((a,b)=>a+b,0)):'—';});}
+
+const indicatorLabels={
+  provinsi:'Provinsi',tgl_update:'Tanggal update dalam layer',tanggal_string:'Tanggal keterangan',tanggal_operasi_udara:'Tanggal operasi udara',
+  id:'ID',objectid:'Object ID',id_prov:'ID provinsi',kib_hitung_prov:'Kode wilayah',
+  fire_spot:'Fire spot',total_hotspot:'Total hotspot',hotspot_rendah:'Hotspot rendah',hotspot_sedang:'Hotspot sedang',hotspot_tinggi:'Hotspot tinggi',
+  today_luas_terbakar:'Luas terbakar harian (ha)',luas_lahan_terbakar_sipongi_2026:'Luas terbakar indikatif SiPongi 2026 (ha)',
+  luas_ditangani_ops_darat:'Luas ditangani operasi darat (ha)',luas_ditangani_ops_udara:'Luas ditangani operasi udara (ha)',
+  luas_ditangani_ops_darat_2026:'Luas ditangani darat 2026 (ha)',luas_ditangani_ops_udara_2026:'Luas ditangani udara 2026 (ha)',luas_ditangani_2026:'Total luas ditangani 2026 (ha)',
+  ground_check:'Ground check',pemadaman_darat:'Pemadaman darat',
+  today_patroli_udara:'Patroli udara hari ini',today_water_bombing:'Water bombing hari ini',today_omc:'OMC hari ini',today_ops_udara:'Operasi udara hari ini',
+  sortie_patroli_udara:'Sortie patroli udara',sortie_water_bombing:'Sortie water bombing',jumlah_wb_harian:'Jumlah water bombing harian',
+  volume_wb_harian:'Volume water bombing harian',sortie_omc:'Sortie OMC',total_bahan_semai:'Total bahan semai',
+  water_bombing:'Keterangan water bombing',patroli_udara:'Keterangan patroli udara',omc:'Keterangan OMC',
+  total_unit_udara:'Total unit udara',unit_udara_standby:'Unit udara siaga',water_bombing_standby:'Water bombing siaga',
+  patroli_omc_standby:'Patroli/OMC siaga',omc_standby:'OMC siaga',jarak_pandang_km:'Jarak pandang (km)',
+  total_personil_gabungan:'Total personel gabungan',sdm_bnpb:'SDM BNPB',sdm_pemerintah_pusat:'SDM pemerintah pusat',
+  sdm_pemerintah_daerah:'SDM pemerintah daerah',bpbd:'BPBD',tni:'TNI',polri:'Polri',relawan:'Relawan',
+  polisi_hutan:'Polisi hutan',manggala_agni:'Manggala Agni',jml_kabupaten_ditangani:'Jumlah kabupaten ditangani',
+  meninggal:'Meninggal',meninggal_laki:'Meninggal laki-laki',meninggal_perempuan:'Meninggal perempuan',
+  kualitas_udara_pm25:'Kualitas udara PM2.5',rekomendasi:'Rekomendasi',kesimpulan:'Kesimpulan'
+};
+function groupForKey(k){
+  if(/^(provinsi|tgl_update|tanggal_string|tanggal_operasi_udara|id|objectid|id_prov|kib_hitung_prov)$/.test(k))return 'Metadata & periode';
+  if(/hotspot|fire_spot|luas_|today_luas_terbakar|ground_check|pemadaman_darat/.test(k))return 'Hotspot, lahan & pemadaman';
+  if(/udara|water_bombing|wb_|sortie|omc|bahan_semai|unit_udara|patroli/.test(k))return 'Operasi udara & water bombing';
+  if(/sdm_|personil|bpbd|tni|polri|relawan|polisi_hutan|manggala_agni|kabupaten|meninggal/.test(k))return 'Personel & dampak';
+  return 'Kondisi lapangan & catatan';
+}
+function renderExplorer(){
+  const selectedProvince=$('explorer-province').value;
+  const record=records.find(r=>r.provinsi===selectedProvince);
+  const host=$('explorer-groups');host.replaceChildren();
+  if(!record){host.textContent='Belum ada rekaman provinsi yang bisa ditampilkan.';return}
+  const query=$('explorer-search').value.toLocaleLowerCase('id').trim();
+  const all=Object.entries(record);
+  const entries=all.filter(([k,v])=>!query||[k,indicatorLabels[k]||k,String(v??'')].some(s=>s.toLocaleLowerCase('id').includes(query)));
+  const groups=new Map();
+  for(const [key,value] of entries){const name=groupForKey(key);if(!groups.has(name))groups.set(name,[]);groups.get(name).push([key,value]);}
+  const order=['Hotspot, lahan & pemadaman','Operasi udara & water bombing','Personel & dampak','Kondisi lapangan & catatan','Metadata & periode'];
+  for(const name of order){
+    const items=groups.get(name);if(!items?.length)continue;
+    const section=document.createElement('section');section.className='indicator-group';
+    const title=document.createElement('h3');title.textContent=name+' · '+items.length+' indikator';section.append(title);
+    const list=document.createElement('dl');list.style.margin='0';
+    for(const [key,value] of items){
+      const row=document.createElement('div');row.className='indicator-row';
+      const dt=document.createElement('dt');dt.textContent=indicatorLabels[key]||key.replaceAll('_',' ');
+      const dd=document.createElement('dd');
+      const missing=value===null||value===undefined||value==='';
+      dd.textContent=missing?'—':typeof value==='number'?fmt(value):String(value);
+      if(missing){dd.classList.add('is-missing');dd.title='Tidak tersedia pada sumber BNPB';}
+      if(typeof value==='string'&&value.length>95)dd.classList.add('long-value');
+      row.append(dt,dd);list.append(row);
+    }
+    section.append(list);host.append(section);
+  }
+  if(!entries.length)host.textContent='Tidak ada indikator sesuai pencarian.';
+  const filled=all.filter(([,v])=>v!==null&&v!==undefined&&v!=='').length;
+  $('explorer-summary').textContent=records.length+' provinsi · '+all.length+' kolom sumber · '+filled+' nilai tersedia untuk '+selectedProvince+' · sumber BNPB';
+}
+function downloadAll(){
+  if(!records.length)return;
+  const blob=new Blob([JSON.stringify({source:'BNPB',scope:'Enam provinsi prioritas',records},null,2)],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const link=document.createElement('a');
+  link.href=url;link.download='BNPB_Karhutla_2026_Seluruh_Indikator.json';document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
 let rankMetric='total_hotspot';function renderRanking(){const rankingKey=rankMetric;const list=$('ranking');list.replaceChildren();const ordered=[...records].sort((a,b)=>(b[rankingKey]??-1)-(a[rankingKey]??-1)),max=Math.max(...records.map(r=>r[rankingKey]||0),1);ordered.forEach((r,i)=>{const item=document.createElement('div');item.className='barrow';item.style.cursor='pointer';const head=document.createElement('div');head.className='barhead';const name=document.createElement('span');name.textContent=(i+1)+'. '+r.provinsi;const value=document.createElement('b');value.textContent=fmt(r[rankingKey])+(rankingKey==='total_hotspot'?'':' ha');head.append(name,value);const track=document.createElement('div');track.className='track';const fill=document.createElement('div');fill.className='fill';fill.style.width=((r[rankingKey]||0)/max*100)+'%';track.append(fill);item.append(head,track);item.onclick=()=>choose(r.provinsi);list.append(item)})}
-function choose(name){selected=name;const r=records.find(x=>x.provinsi===name);if(!r)return;$('selection').textContent=name+' · ringkasan indikator penanganan karhutla';$('sel-fire').textContent=fmt(r.fire_spot);$('sel-sorties').textContent=fmt(r.sortie_water_bombing);$('sel-indicative').textContent=fmt(r.luas_lahan_terbakar_sipongi_2026);$('sel-daily').textContent=fmt(r.lahan_terbakar_harian_ha);paintMap()}
+function choose(name){selected=name;const r=records.find(x=>x.provinsi===name);if(!r)return;$('selection').textContent=name+' · ringkasan indikator penanganan karhutla';$('sel-fire').textContent=fmt(r.fire_spot);$('sel-sorties').textContent=fmt(r.sortie_water_bombing);$('sel-indicative').textContent=fmt(r.luas_lahan_terbakar_sipongi_2026);$('sel-daily').textContent=fmt(r.today_luas_terbakar);paintMap();if($('explorer-province')){$('explorer-province').value=name;renderExplorer()}}
 function provinceName(props){const raw=String(props?.PROVINSI||props?.name||props?.provinsi||props?.Propinsi||props?.NAME_1||props?.WADMPR||props?.nama||'').trim();const n=raw.toLowerCase().replace(/[^a-z0-9]/g,'');const aliases={sumateraselatan:'Sumatera Selatan',sumatraselatan:'Sumatera Selatan',kalimantanbarat:'Kalimantan Barat',kalimantantengah:'Kalimantan Tengah',kalimantanselatan:'Kalimantan Selatan',riau:'Riau',jambi:'Jambi'};return aliases[n]||raw}
 function paintMap(){if(!geoLayer)return;const max=Math.max(...records.map(r=>r[metric]||0),1);geoLayer.eachLayer(l=>{const name=provinceName(l.feature.properties),r=records.find(x=>x.provinsi===name),hasData=r&&typeof r[metric]==='number';l.setStyle({fillColor:hasData?color(r[metric],max):'#ffffff',fillOpacity:1,color:name===selected?'#173e73':'#cbd5e2',weight:name===selected?2.8:.85});l.bindTooltip(hasData?name+' · '+label(metric)+': '+fmt(r[metric]):name+' · Data tidak tersedia',{sticky:true})})}
 async function initMap(){if(typeof L==='undefined'){$('map-note').textContent='Pustaka peta belum termuat.';return}
@@ -86,7 +190,7 @@ map=L.map('map',{zoomControl:false,scrollWheelZoom:false,attributionControl:fals
 let geo=null;try{const res=await fetch('data/indonesia-38-provinsi.geojson?v=38prov20261104',{cache:'no-store'});if(!res.ok)throw Error('HTTP '+res.status);geo=await res.json();if(geo.type!=='FeatureCollection'||geo.features.length!==38)throw Error('GeoJSON bukan 38 provinsi')}catch(e){$('map-note').textContent='Peta 38 provinsi gagal dimuat: '+e.message;console.error(e);return}
 geoLayer=L.geoJSON(geo,{style:{color:'#cbd5e2',weight:.85,fillColor:'#ffffff',fillOpacity:1},onEachFeature:(feature,layer)=>{const name=provinceName(feature.properties);if(provinces.includes(name))layer.on('click',()=>choose(name))}}).addTo(map);
 map.invalidateSize();map.fitBounds(geoLayer.getBounds(),{padding:[12,12]});if(geo.features.length>=30)$('map-note').textContent='Seluruh provinsi ditampilkan · putih = tidak ada data pada dataset';paintMap()}
-async function start(){try{const res=await fetch('data/karhutla.json?v=redesign20261103',{cache:'no-store'});if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();records=data.features.map(f=>f.attributes).filter(r=>provinces.includes(r.provinsi));if(records.length!==6)throw Error('Data enam provinsi tidak lengkap');$('hotspot').textContent=fmt(sum('total_hotspot'));$('indicative').textContent=fmt(sum('luas_lahan_terbakar_sipongi_2026'));$('daily').textContent=fmt(sum('lahan_terbakar_harian_ha'));$('people').textContent=fmt(sum('total_personil_gabungan'));records.forEach(r=>$('ops-province').add(new Option(r.provinsi,r.provinsi)));renderOps();renderRanking();initMap()}catch(e){console.error('Gagal memuat data BNPB:',e);$('map-note').textContent='Data belum berhasil dimuat.'}}
-setTheme(theme);$('theme-toggle').addEventListener('click',()=>setTheme(theme==='dark'?'light':'dark'));$('ops-province').addEventListener('change',renderOps);document.querySelectorAll('[data-metric]').forEach(b=>b.addEventListener('click',()=>setMetric(b.dataset.metric)));document.querySelectorAll('[data-rank]').forEach(b=>b.addEventListener('click',()=>{rankMetric=b.dataset.rank;document.querySelectorAll('[data-rank]').forEach(t=>t.classList.toggle('active',t===b));renderRanking()}));start();
+async function start(){try{const res=await fetch('data/karhutla.json?v=semua-kolom-20261106',{cache:'no-store'});if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();records=data.features.map(f=>f.attributes).filter(r=>provinces.includes(r.provinsi));if(records.length!==6)throw Error('Data enam provinsi tidak lengkap');$('hotspot').textContent=fmt(sum('total_hotspot'));$('indicative').textContent=fmt(sum('luas_lahan_terbakar_sipongi_2026'));$('daily').textContent=fmt(sum('today_luas_terbakar'));$('people').textContent=fmt(sum('total_personil_gabungan'));records.forEach(r=>{$('ops-province').add(new Option(r.provinsi,r.provinsi));$('explorer-province').add(new Option(r.provinsi,r.provinsi))});$('explorer-province').value=records[0].provinsi;renderOps();renderRanking();renderExplorer();initMap()}catch(e){console.error('Gagal memuat data BNPB:',e);$('map-note').textContent='Data belum berhasil dimuat.'}}
+setTheme(theme);$('theme-toggle').addEventListener('click',()=>setTheme(theme==='dark'?'light':'dark'));$('ops-province').addEventListener('change',renderOps);$('explorer-province').addEventListener('change',renderExplorer);$('explorer-search').addEventListener('input',renderExplorer);$('download-all').addEventListener('click',downloadAll);document.querySelectorAll('[data-metric]').forEach(b=>b.addEventListener('click',()=>setMetric(b.dataset.metric)));document.querySelectorAll('[data-rank]').forEach(b=>b.addEventListener('click',()=>{rankMetric=b.dataset.rank;document.querySelectorAll('[data-rank]').forEach(t=>t.classList.toggle('active',t===b));renderRanking()}));start();
 })();
 </script></body></html>
