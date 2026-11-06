@@ -14,7 +14,7 @@ from urllib.request import Request, urlopen
 
 BASE = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_prov_karhutla_2026/MapServer/3/query'
 V2 = 'https://gis.bnpb.go.id/server/rest/services/2026_karhutla/mv_tabeldata_karhutla_prov_2026_v2/MapServer/3/query'
-FIELDS = 'provinsi,tgl_update,total_hotspot,hotspot_rendah,hotspot_sedang,hotspot_tinggi,luas_lahan_terbakar_sipongi_2026,total_personil_gabungan,sortie_water_bombing'
+FIELDS = '*'  # Preserve every source field, not just the nine fields used by earlier cards.
 URL = BASE + '?' + urlencode({'where':'1=1','outFields':FIELDS,'returnGeometry':'false','f':'json','resultRecordCount':2000})
 ROOT = Path(__file__).resolve().parents[1]
 PRIORITY_PROVINCES = {'RIAU', 'JAMBI', 'SUMATERA SELATAN', 'KALIMANTAN BARAT', 'KALIMANTAN TENGAH', 'KALIMANTAN SELATAN'}
@@ -38,7 +38,7 @@ def main():
             print(f'Endpoint unavailable {base}: {exc}')
     if not candidates:
         raise RuntimeError('No verified province records from either BNPB endpoint')
-    newest, selected_base, rows = max(candidates, key=lambda item:item[0])
+    newest, selected_base, rows = max(candidates, key=lambda item:(item[0], sum(sum(value is not None and value != '' for value in row.values()) for row in item[2])))
     existing_path = ROOT / 'data' / 'karhutla.json'
     if existing_path.exists():
         existing = json.loads(existing_path.read_text(encoding='utf-8'))
@@ -57,11 +57,13 @@ def main():
         name = row['provinsi'].strip().upper()
         old = latest.get(name)
         if old is None or str(row.get('tgl_update') or '') > str(old.get('tgl_update') or ''):
-            latest[name] = {k:row.get(k) for k in FIELDS.split(',')}
+            latest[name] = dict(row)  # Keep all official BNPB attributes, including operational metrics and notes.
     payload = {
         'source': selected_base.rsplit('/query',1)[0],
         'fetched_at': datetime.now(timezone.utc).isoformat(),
         'scope_note': 'Six priority provinces only; not national totals; missing values are not zero',
+        'available_fields': sorted({key for row in latest.values() for key in row}),
+        'field_count': len({key for row in latest.values() for key in row}),
         'features': [{'attributes':row} for row in sorted(latest.values(),key=lambda r:r['provinsi'])]
     }
     output = ROOT / 'data' / 'karhutla.json'
