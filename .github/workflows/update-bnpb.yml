@@ -1,6 +1,11 @@
 name: Refresh BNPB karhutla snapshot
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/update_snapshot.py'
+      - '.github/workflows/update-bnpb.yml'
   schedule:
     - cron: '25 3 * * *' # 10:25 WIB daily, if GitHub Actions is enabled
 permissions:
