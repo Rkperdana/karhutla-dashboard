@@ -76,6 +76,8 @@ html[data-theme="dark"] .indicator-row dd.long-value{background:#203248;color:#d
 html[data-theme="dark"] .explorer-actions input,html[data-theme="dark"] .explorer-select{color:#edf4ff;background:#1a2a3d;border-color:#3a4d63}
 @media(max-width:800px){.explorer-groups{grid-template-columns:1fr}.explorer-select{max-width:100%}}
 @media(max-width:600px){.indicator-group{padding:13px}.indicator-row{grid-template-columns:minmax(100px,1fr) minmax(80px,.8fr);gap:8px}.explorer-actions input,.explorer-actions button{width:100%}}
+/* Hide detailed BNPB indicator table from dashboard; keep data logic intact. */
+#eksplorasi{display:none!important}
 </style></head><body>
 <header class="top"><div class="topin"><div class="brand">KARHUTLA<b> / </b>MONITOR</div><nav class="nav"><a href="#operasional">Operasional</a><a href="#peta">Peta</a></nav><div class="header-actions"><span class="pill">BNPB · 2026</span><button type="button" id="theme-toggle" class="theme-toggle" aria-label="Aktifkan mode gelap" aria-pressed="false">☾ <span>Dark</span></button></div></div></header>
 <main class="shell"><section class="hero"><div><div class="eyebrow">Indonesia · Monitoring Center</div><h1>Karhutla Monitoring Center<br>Indonesia 2026</h1><p>Eksplorasi indikator karhutla di enam provinsi prioritas berdasarkan data ekspor BNPB.<br>Setiap indikator ditampilkan sesuai kolom aslinya, tanpa estimasi atau angka rekaan.</p></div><div class="source"><strong>Sumber data: BNPB, per 5 November 2026</strong></div></section>
