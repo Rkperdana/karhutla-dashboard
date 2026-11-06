@@ -46,8 +46,8 @@ def main():
             print('Preserving official CSV snapshot until a verified equivalent live data endpoint is configured')
             return
         existing_dates = [str(x.get('attributes', {}).get('tgl_update') or '') for x in existing.get('features', [])]
-        existing_newest = max(existing_dates, default='')
-        if existing_newest and newest < existing_newest:
+        existing_newest = max([str(existing.get('snapshot_date') or existing.get('reference_date') or ''), *existing_dates], default='')
+        if existing_newest and newest <= existing_newest:
             print(f'Skipping stale API snapshot ({newest}); existing verified data is {existing_newest}')
             return
     if not rows:
@@ -70,7 +70,7 @@ def main():
     if output.exists():
         try:
             previous = json.loads(output.read_text(encoding='utf-8'))
-            previous_date = str(previous.get('reference_date') or max((str(f.get('attributes', {}).get('tgl_update') or '') for f in previous.get('features', [])), default=''))
+            previous_date = str(previous.get('snapshot_date') or previous.get('reference_date') or max((str(f.get('attributes', {}).get('tgl_update') or '') for f in previous.get('features', [])), default=''))
             if previous_date > str(max((r.get('tgl_update') or '' for r in latest.values()), default='')):
                 print(f'Keeping newer verified snapshot ({previous_date}); ArcGIS data is older')
                 return
